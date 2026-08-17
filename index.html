@@ -52,7 +52,7 @@
   <!-- 2. หน้าหลัก (MAIN DASHBOARD SPREADSHEET) -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
     
-    <!-- Profile Header (จะสลับเป็นของเพื่อนอัตโนมัติเมื่อกดส่อง) -->
+    <!-- Profile Header -->
     <div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
       <div class="flex items-center gap-3">
         <img id="userAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Profile">
@@ -85,15 +85,15 @@
     <!-- VIEW 1: MY TABLE & EDITING -->
     <div id="viewMyTable" class="space-y-6">
       <div class="flex justify-between items-center">
-        <h3 id="tableTitle" class="text-sm font-bold text-amber-500">จัดการตารางงบประมาณส่วนตัว</h3>
-        <div id="tableActions" class="flex gap-2">
+        <h3 class="text-sm font-bold text-amber-500">จัดการตารางงบประมาณส่วนตัว</h3>
+        <div class="flex gap-2">
           <button onclick="addRow('income')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">+ เพิ่มรับ</button>
           <button onclick="addRow('expense')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">+ เพิ่มจ่าย</button>
         </div>
       </div>
 
-      <!-- Grid Content (จะถูกล็อกด้วย pointer-events-none เมื่อส่องเพื่อน) -->
-      <div id="tableContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all">
+      <!-- Main Grid Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-8 space-y-6">
           <!-- Income -->
           <div class="space-y-2">
@@ -137,16 +137,16 @@
             <h3 class="text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
             <div class="space-y-2 text-xs">
               <div class="flex justify-between items-center">
-                <input type="text" id="extIncName1" value="เงินเดือน" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extIncVal1" value="28000" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
+                <input type="text" id="extIncName1" value="เงินเดือน" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extIncVal1" value="28000" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
               </div>
               <div class="flex justify-between items-center">
-                <input type="text" id="extIncName2" value="บัตร Finnix" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extIncVal2" value="500" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
+                <input type="text" id="extIncName2" value="บัตร Finnix" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extIncVal2" value="500" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
               </div>
               <div class="flex justify-between items-center">
-                <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
+                <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
               </div>
               <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
                 <span class="text-emerald-500">รวมรายรับเสริม:</span>
@@ -160,12 +160,12 @@
             <h3 class="text-xs font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
             <div class="space-y-2 text-xs">
               <div class="flex justify-between items-center">
-                <input type="text" id="extExpName1" value="ให้ครอบครัว" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extExpVal1" value="16000" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
+                <input type="text" id="extExpName1" value="ให้ครอบครัว" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extExpVal1" value="16000" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
               </div>
               <div class="flex justify-between items-center">
-                <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
+                <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
               </div>
               <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
                 <span class="text-rose-500">รวมรายจ่ายไทย:</span>
@@ -176,7 +176,7 @@
         </div>
       </div>
 
-      <!-- Summary Box (รวมยอดทั้งหมด) -->
+      <!-- Summary Box -->
       <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
         <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
           <div>
@@ -201,6 +201,32 @@
       <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
     </div>
 
+  </div>
+
+  <!-- 3. POPUP MODAL: ส่องตารางเพื่อน (READ-ONLY 100%) -->
+  <div id="friendTableModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+    <div class="bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 max-w-5xl w-full my-auto space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      
+      <!-- Close Button -->
+      <button onclick="closeFriendModal()" class="absolute top-4 right-4 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 p-2 rounded-full font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+
+      <!-- Friend Profile Header -->
+      <div class="flex items-center gap-3 border-b border-stone-200 dark:border-stone-800 pb-4">
+        <img id="friendAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Friend Profile">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="friendName" class="font-bold text-base text-stone-800 dark:text-slate-100">...</h2>
+            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-bold">🔒 อ่านได้อย่างเดียว</span>
+          </div>
+          <p id="friendBio" class="text-xs text-stone-500 dark:text-stone-400 italic">ไม่มีคำอธิบายโปรไฟล์</p>
+        </div>
+      </div>
+
+      <!-- Friend Table Content (Text Only) -->
+      <div id="friendTableContent" class="space-y-6">
+        <!-- Content Will be Injected Here -->
+      </div>
+    </div>
   </div>
 
   <!-- MODAL: SETTINGS & EDIT PROFILE -->
@@ -242,7 +268,6 @@
     
     let currentUser = null;
     let saveTimeout = null;
-    let viewingOtherUser = false;
 
     // Default Values
     const defaultIncomes = [
@@ -304,10 +329,8 @@
         document.getElementById('userNameDisplay').textContent = prof.displayName || 'ผู้ใช้งาน';
         document.getElementById('userBioDisplay').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
         
-        if (currentUser && uid === currentUser.uid) {
-          document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
-          document.getElementById('editBio').value = prof.bio || '';
-        }
+        document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
+        document.getElementById('editBio').value = prof.bio || '';
       });
     }
 
@@ -341,15 +364,6 @@
         btnCom.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
         viewMy.classList.remove('hidden');
         viewCom.classList.add('hidden');
-        
-        if (viewingOtherUser) {
-          viewingOtherUser = false;
-          loadUserProfile(currentUser.uid);
-          document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
-          document.getElementById('tableActions').classList.remove('hidden');
-          setInputsDisabled(false);
-          loadUserData(currentUser.uid);
-        }
       } else {
         btnCom.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
         btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
@@ -359,7 +373,7 @@
       }
     }
 
-    // --- COMMUNITY & INSPECT OTHER USERS ---
+    // --- COMMUNITY & INSPECT OTHER USERS IN POPUP ---
     function loadCommunityMembers() {
       const memberListEl = document.getElementById('memberList');
       memberListEl.innerHTML = '<p class="text-xs text-stone-400">กำลังโหลดรายชื่อสมาชิก...</p>';
@@ -378,7 +392,7 @@
 
           const card = document.createElement('div');
           card.className = "bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-3 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500 transition shadow-sm";
-          card.onclick = () => inspectUserTable(uid);
+          card.onclick = () => openFriendTableModal(uid);
 
           card.innerHTML = `
             <div class="flex items-center gap-3">
@@ -395,72 +409,151 @@
       });
     }
 
-    function inspectUserTable(uid) {
-      viewingOtherUser = (uid !== currentUser.uid);
-      
-      switchTab('myTable');
-      loadUserProfile(uid);
+    function openFriendTableModal(uid) {
+      db.ref('users/' + uid).once('value').then(snap => {
+        const user = snap.val() || {};
+        const prof = user.profile || {};
+        const data = user.data || {};
 
-      if (viewingOtherUser) {
-        document.getElementById('tableTitle').textContent = `🔍 ตารางงบประมาณ (โหมดอ่านอย่างเดียว 🔒)`;
-        document.getElementById('tableActions').classList.add('hidden');
-        setInputsDisabled(true);
-      } else {
-        document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
-        document.getElementById('tableActions').classList.remove('hidden');
-        setInputsDisabled(false);
-      }
+        document.getElementById('friendAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
+        document.getElementById('friendName').textContent = prof.displayName || 'ผู้ใช้งาน';
+        document.getElementById('friendBio').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
 
-      loadUserData(uid);
-    }
-
-    // ล็อก/ปลดล็อก Input และป้องกันการกดบนคอมและมือถือ
-    function setInputsDisabled(disabled) {
-      const container = document.getElementById('tableContainer');
-      
-      if (disabled) {
-        container.classList.add('pointer-events-none', 'select-none'); // บล็อกสัมผัสบนมือถือ/เมาส์
-      } else {
-        container.classList.remove('pointer-events-none', 'select-none');
-      }
-
-      document.querySelectorAll('#viewMyTable input').forEach(input => {
-        input.disabled = disabled;
-        input.readOnly = disabled;
-
-        if (disabled) {
-          // สไตล์คอม: กล่องสีเทา + ไอคอนห้ามพิมพ์
-          input.classList.add('bg-stone-200', 'dark:bg-stone-800', 'text-stone-400', 'dark:text-stone-500', 'cursor-not-allowed');
-          input.classList.remove('bg-white', 'dark:bg-stone-900', 'bg-transparent');
-        } else {
-          input.classList.remove('bg-stone-200', 'dark:bg-stone-800', 'text-stone-400', 'dark:text-stone-500', 'cursor-not-allowed');
-          if (input.classList.contains('row-est') || input.classList.contains('row-act') || input.classList.contains('ext-input')) {
-            input.classList.add('bg-white', 'dark:bg-stone-900');
-          } else {
-            input.classList.add('bg-transparent');
-          }
-        }
+        renderFriendTableText(data);
+        document.getElementById('friendTableModal').classList.remove('hidden');
       });
     }
 
-    // --- SPREADSHEET RENDER & CALCULATIONS ---
+    function closeFriendModal() {
+      document.getElementById('friendTableModal').classList.add('hidden');
+    }
+
+    // แสดงผลตารางเพื่อนเป็น Text ล้วนๆ (แก้ไม่ได้ 100%)
+    function renderFriendTableText(data) {
+      const incList = data.incomes || defaultIncomes;
+      const expList = data.expenses || defaultExpenses;
+      const ext = data.extras || {};
+
+      let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
+      let incHtml = incList.map(item => {
+        const est = item.est || 0; const act = item.act || 0; const diff = est - act;
+        totIncEst += est; totIncAct += act; totIncDiff += diff;
+        return `
+          <div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
+            <span class="col-span-5 text-emerald-500 font-semibold">${item.name || '-'}</span>
+            <span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
+            <span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
+            <span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
+          </div>`;
+      }).join('');
+
+      let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
+      let expHtml = expList.map(item => {
+        const est = item.est || 0; const act = item.act || 0; const diff = est - act;
+        totExpEst += est; totExpAct += act; totExpDiff += diff;
+        return `
+          <div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
+            <span class="col-span-5 text-amber-500 font-semibold">${item.name || '-'}</span>
+            <span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
+            <span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
+            <span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
+          </div>`;
+      }).join('');
+
+      const extInc1 = ext.inc1?.val || 0; const extInc2 = ext.inc2?.val || 0; const extInc3 = ext.inc3?.val || 0;
+      const totalExtInc = extInc1 + extInc2 + extInc3;
+
+      const extExp1 = ext.exp1?.val || 0; const extExp2 = ext.exp2?.val || 0;
+      const totalExtExp = extExp1 + extExp2;
+
+      const grandTotalIncome = totIncAct + totalExtInc;
+      const grandTotalExpense = totExpAct + totalExtExp;
+      const grandTotalBalance = grandTotalIncome - grandTotalExpense;
+
+      const html = `
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-8 space-y-6">
+            <!-- Income -->
+            <div class="space-y-1">
+              <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-2">
+                <span class="col-span-5">รายรับรายเดือน</span>
+                <span class="col-span-2 text-right">ประมาณ</span>
+                <span class="col-span-3 text-right">รับจริง</span>
+                <span class="col-span-2 text-right">ผลต่าง</span>
+              </div>
+              ${incHtml}
+              <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2">
+                <span class="col-span-5">ผลรวมรายรับหลัก</span>
+                <span class="col-span-2 text-right">${totIncEst.toLocaleString('th-TH')}</span>
+                <span class="col-span-3 text-right">${totIncAct.toLocaleString('th-TH')}</span>
+                <span class="col-span-2 text-right">${totIncDiff.toLocaleString('th-TH')}</span>
+              </div>
+            </div>
+
+            <!-- Expense -->
+            <div class="space-y-1 pt-4">
+              <div class="grid grid-cols-12 text-xs font-bold text-amber-500 border-b border-stone-200 dark:border-stone-700 pb-2">
+                <span class="col-span-5">รายจ่ายการทำงาน</span>
+                <span class="col-span-2 text-right">ประมาณ</span>
+                <span class="col-span-3 text-right">จ่ายจริง</span>
+                <span class="col-span-2 text-right">ผลต่าง</span>
+              </div>
+              ${expHtml}
+              <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2">
+                <span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
+                <span class="col-span-2 text-right">${totExpEst.toLocaleString('th-TH')}</span>
+                <span class="col-span-3 text-right">${totExpAct.toLocaleString('th-TH')}</span>
+                <span class="col-span-2 text-right">${totExpDiff.toLocaleString('th-TH')}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Extra Right -->
+          <div class="lg:col-span-4 space-y-4 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+            <div class="space-y-2 text-xs">
+              <h3 class="font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
+              <div class="flex justify-between py-1"><span>${ext.inc1?.name || 'เงินเดือน'}</span><span class="font-bold text-emerald-500">${extInc1.toLocaleString('th-TH')}</span></div>
+              <div class="flex justify-between py-1"><span>${ext.inc2?.name || 'บัตร Finnix'}</span><span class="font-bold text-emerald-500">${extInc2.toLocaleString('th-TH')}</span></div>
+              <div class="flex justify-between py-1"><span>${ext.inc3?.name || 'บัตร Promise'}</span><span class="font-bold text-emerald-500">${extInc3.toLocaleString('th-TH')}</span></div>
+              <div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-emerald-500">รวมรายรับเสริม:</span><span class="text-emerald-500">${totalExtInc.toLocaleString('th-TH')}</span></div>
+            </div>
+
+            <div class="space-y-2 text-xs pt-2 border-t border-stone-200 dark:border-stone-800">
+              <h3 class="font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
+              <div class="flex justify-between py-1"><span>${ext.exp1?.name || 'ให้ครอบครัว'}</span><span class="font-bold text-rose-500">${extExp1.toLocaleString('th-TH')}</span></div>
+              <div class="flex justify-between py-1"><span>${ext.exp2?.name || 'ค่าเลี้ยงบุตร***'}</span><span class="font-bold text-rose-500">${extExp2.toLocaleString('th-TH')}</span></div>
+              <div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-rose-500">รวมรายจ่ายไทย:</span><span class="text-rose-500">${totalExtExp.toLocaleString('th-TH')}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
+          <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
+            <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-emerald-500">${grandTotalIncome.toLocaleString('th-TH')}</p></div>
+            <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-rose-500">${grandTotalExpense.toLocaleString('th-TH')}</p></div>
+            <div><p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p><p class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">${grandTotalBalance.toLocaleString('th-TH')}</p></div>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('friendTableContent').innerHTML = html;
+    }
+
+    // --- SPREADSHEET RENDER & CALCULATIONS FOR MY TABLE ---
     function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
       const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
-      const isDisabled = viewingOtherUser ? 'disabled readonly' : '';
-      const disabledClass = viewingOtherUser ? 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed' : '';
-
       return `
         <div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
-          <input type="text" value="${data.name}" ${isDisabled} placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 ${disabledClass} ${textColor} border-b border-stone-300 dark:border-stone-800 focus:border-amber-500 focus:outline-none px-1">
-          <input type="number" step="0.01" value="${data.est}" ${isDisabled} oninput="onDataChange()" class="row-est col-span-2 ${disabledClass || 'bg-white dark:bg-stone-900'} border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
-          <input type="number" step="0.01" value="${data.act}" ${isDisabled} oninput="onDataChange()" class="row-act col-span-3 ${disabledClass || 'bg-white dark:bg-stone-900'} border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+          <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
+          <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+          <input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
           <span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
         </div>
       `;
     }
 
     function addRow(type) {
-      if (viewingOtherUser) return;
       const box = document.getElementById(type === 'income' ? 'incomeRows' : 'expenseRows');
       box.insertAdjacentHTML('beforeend', createRowHTML(type));
       onDataChange();
@@ -468,18 +561,18 @@
 
     function onDataChange() {
       calculate();
-      if (!viewingOtherUser) triggerAutoSave();
+      triggerAutoSave();
     }
 
     function triggerAutoSave() {
-      if (!currentUser || viewingOtherUser) return;
+      if (!currentUser) return;
       updateSaveStatus("กำลังบันทึก...", "bg-amber-900/50 text-amber-400");
       clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => saveUserData(), 1000);
     }
 
     function saveUserData() {
-      if (!currentUser || viewingOtherUser) return;
+      if (!currentUser) return;
 
       const incomes = [];
       document.querySelectorAll('.income-row').forEach(row => {
@@ -517,7 +610,7 @@
     }
 
     function loadUserData(targetUid) {
-      updateSaveStatus(viewingOtherUser ? "โหมดอ่านอย่างเดียว 🔒" : "กำลังโหลด...", "bg-stone-800 text-stone-400");
+      updateSaveStatus("กำลังโหลด...", "bg-stone-800 text-stone-400");
 
       db.ref('users/' + targetUid + '/data').once('value').then((snapshot) => {
         const data = snapshot.val();
@@ -540,10 +633,8 @@
           expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
         }
 
-        if (viewingOtherUser) setInputsDisabled(true);
-
         calculate();
-        if (!viewingOtherUser) updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
+        updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
       });
     }
 
