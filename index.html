@@ -1,766 +1,755 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MJ Cashflow & Social Budget System</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-    }
-  </script>
-  <!-- Firebase SDKs -->
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-  <style>
-    body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MJ Cashflow & Social Budget System</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+darkMode: 'class',
+}
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<style>
+body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s; }
+</style>
 </head>
 <body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800">
 
-  <!-- TOP BAR -->
-  <div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
-    <div class="flex items-center gap-2">
-      <span class="text-2xl">📊</span>
-      <h1 class="text-lg font-bold text-amber-500">MJ Cashflow Community</h1>
-    </div>
-    <button onclick="toggleTheme()" class="p-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-amber-400 font-bold text-xs flex items-center gap-1 shadow">
-      <span id="themeIcon">☀️</span> <span id="themeText">โหมดสว่าง</span>
-    </button>
-  </div>
-
-  <!-- 1. LOGIN SCREEN -->
-  <div id="loginScreen" class="max-w-md mx-auto my-16 bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-6">
-    <div class="space-y-2">
-      <h1 class="text-2xl font-bold text-amber-500">📊 MJ Cashflow System</h1>
-      <p class="text-xs text-stone-500 dark:text-stone-400">เข้าสู่ระบบเพื่อจัดการงบประมาณและแชร์ตารางร่วมกับเพื่อนๆ</p>
-    </div>
-    
-    <button id="googleLoginBtn" onclick="loginWithGoogle()" class="w-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:opacity-90 transition shadow-lg">
-      <svg class="w-5 h-5" viewBox="0 0 24 24">
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-      </svg>
-      เข้าสู่ระบบด้วย Google
-    </button>
-  </div>
-
-  <!-- 2. MAIN DASHBOARD -->
-  <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
-    
-    <!-- Profile Header -->
-    <div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
-      <div class="flex items-center gap-3">
-        <img id="userAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Profile">
-        <div>
-          <div class="flex items-center gap-2">
-            <h2 id="userNameDisplay" class="font-bold text-base text-stone-800 dark:text-slate-100">...</h2>
-            <span id="saveStatus" class="text-[10px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">พร้อมใช้งาน</span>
-          </div>
-          <p id="userBioDisplay" class="text-xs text-stone-500 dark:text-stone-400 italic">ไม่มีคำอธิบายโปรไฟล์</p>
-        </div>
-      </div>
-
-      <!-- Navigation Tabs -->
-      <div class="flex flex-wrap items-center gap-2">
-        <div class="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
-          <button onclick="switchTab('myTable')" id="tabMyTable" class="bg-amber-500 text-stone-900 text-xs px-3 py-1.5 rounded-lg font-bold transition">
-            📋 ตารางของฉัน
-          </button>
-          <!-- ปุ่มแก้ไขดินสอ -->
-          <button id="toggleEditBtn" onclick="toggleEditMode()" title="สลับโหมดแก้ไข" class="bg-stone-200 dark:bg-stone-700 hover:bg-amber-500 text-stone-700 dark:text-stone-200 hover:text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1">
-            ✏️ <span id="editBtnText" class="text-[11px]">อ่านอย่างเดียว</span>
-          </button>
-        </div>
-
-        <button onclick="switchTab('community')" id="tabCommunity" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
-          👥 สมาชิกทั้งหมด
-        </button>
-        <button onclick="openProfileModal()" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
-          ⚙️ ตั้งค่าโปรไฟล์
-        </button>
-        <button onclick="logout()" class="bg-rose-600/10 text-rose-500 hover:bg-rose-600 hover:text-white text-xs px-3 py-2 rounded-xl font-bold transition">
-          ออกจากระบบ
-        </button>
-      </div>
-    </div>
-
-    <!-- VIEW 1: MY TABLE -->
-    <div id="viewMyTable" class="space-y-6">
-      
-      <!-- Main Grid Content -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-8 space-y-6">
-          
-          <!-- Income Section -->
-          <div class="space-y-2">
-            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-2">
-              <div class="text-xs font-bold text-emerald-500 flex items-center gap-2">
-                <span>รายรับรายเดือน</span>
-                <button onclick="addRow('income')" class="edit-only-btn hidden bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded font-bold transition">+ เพิ่มแถว</button>
-              </div>
-              <div class="grid grid-cols-7 gap-2 text-xs font-bold text-emerald-500 text-right w-1/2">
-                <span class="col-span-3">ประมาณ</span>
-                <span class="col-span-4">รับจริง</span>
-              </div>
-            </div>
-            <div id="incomeRows" class="space-y-2"></div>
-            <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2 border-t border-stone-200 dark:border-stone-700">
-              <span class="col-span-5">ผลรวมรายรับหลัก</span>
-              <span id="totIncEst" class="col-span-2 text-right">0</span>
-              <span id="totIncAct" class="col-span-3 text-right">0</span>
-              <span id="totIncDiff" class="col-span-2 text-right">0</span>
-            </div>
-          </div>
-
-          <!-- Expense Section -->
-          <div class="space-y-2 pt-4">
-            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-2">
-              <div class="text-xs font-bold text-amber-500 flex items-center gap-2">
-                <span>รายจ่ายการทำงาน</span>
-                <button onclick="addRow('expense')" class="edit-only-btn hidden bg-rose-600 hover:bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded font-bold transition">+ เพิ่มแถว</button>
-              </div>
-              <div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-500 text-right w-1/2">
-                <span class="col-span-3">ประมาณ</span>
-                <span class="col-span-4">จ่ายจริง</span>
-              </div>
-            </div>
-            <div id="expenseRows" class="space-y-2"></div>
-            <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2 border-t border-stone-200 dark:border-stone-700">
-              <span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
-              <span id="totExpEst" class="col-span-2 text-right">0</span>
-              <span id="totExpAct" class="col-span-3 text-right">0</span>
-              <span id="totExpDiff" class="col-span-2 text-right">0</span>
-            </div>
-          </div>
-
-        </div>
-
-        <!-- Extra Tables (ฝั่งขวา) -->
-        <div class="lg:col-span-4 space-y-6 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
-          
-          <!-- รายรับเสริม -->
-          <div class="space-y-2">
-            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-1">
-              <h3 class="text-xs font-bold text-emerald-500">รายรับ/ต่อเดือน</h3>
-              <button onclick="addExtraRow('extIncome')" class="edit-only-btn hidden bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
-            </div>
-            <div id="extIncomeContainer" class="space-y-2 text-xs"></div>
-            <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
-              <span class="text-emerald-500">รวมรายรับเสริม:</span>
-              <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
-            </div>
-          </div>
-
-          <!-- รายจ่ายไทย -->
-          <div class="space-y-2 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-1">
-              <h3 class="text-xs font-bold text-rose-500">รายจ่ายฝั่งไทย</h3>
-              <button onclick="addExtraRow('extExpense')" class="edit-only-btn hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
-            </div>
-            <div id="extExpenseContainer" class="space-y-2 text-xs"></div>
-            <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
-              <span class="text-rose-500">รวมรายจ่ายไทย:</span>
-              <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      <!-- Summary Box -->
-      <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
-        <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
-          <div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p>
-            <p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-500">0</p>
-          </div>
-          <div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p>
-            <p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-500">0</p>
-          </div>
-          <div>
-            <p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p>
-            <p id="finalBalance" class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">0</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 2: COMMUNITY -->
-    <div id="viewCommunity" class="hidden space-y-4">
-      <h3 class="text-sm font-bold text-amber-500">👥 สมาชิกทั้งหมดในระบบ (คลิกที่ชื่อเพื่อส่องตารางการเงิน)</h3>
-      <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-    </div>
-
-  </div>
-
-  <!-- POPUP: FRIEND TABLE (READ-ONLY) -->
-  <div id="friendTableModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
-    <div class="bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 max-w-5xl w-full my-auto space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      <button onclick="closeFriendModal()" class="absolute top-4 right-4 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 p-2 rounded-full font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
-
-      <div class="flex items-center gap-3 border-b border-stone-200 dark:border-stone-800 pb-4">
-        <img id="friendAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Friend Profile">
-        <div>
-          <div class="flex items-center gap-2">
-            <h2 id="friendName" class="font-bold text-base text-stone-800 dark:text-slate-100">...</h2>
-            <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-bold">🔒 อ่านได้อย่างเดียว</span>
-          </div>
-          <p id="friendBio" class="text-xs text-stone-500 dark:text-stone-400 italic">ไม่มีคำอธิบายโปรไฟล์</p>
-        </div>
-      </div>
-
-      <div id="friendTableContent" class="space-y-6"></div>
-    </div>
-  </div>
-
-  <!-- MODAL: SETTINGS & EDIT PROFILE -->
-  <div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-      <h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่าโปรไฟล์ส่วนตัว</h3>
-      <div class="space-y-3 text-xs">
-        <div>
-          <label class="block text-stone-500 dark:text-stone-400 mb-1">ชื่อที่แสดง (Display Name)</label>
-          <input type="text" id="editDisplayName" class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none">
-        </div>
-        <div>
-          <label class="block text-stone-500 dark:text-stone-400 mb-1">คำอธิบายโปรไฟล์ (Bio)</label>
-          <textarea id="editBio" rows="3" placeholder="เขียนสโลแกนหรือการเงินสไตล์คุณ..." class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none"></textarea>
-        </div>
-      </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeProfileModal()" class="px-4 py-2 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs rounded-xl font-bold">ยกเลิก</button>
-        <button onclick="saveProfileSettings()" class="px-4 py-2 bg-amber-500 text-stone-900 text-xs rounded-xl font-bold">บันทึกเปลี่ยนแปลง</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    // --- FIREBASE CONFIG ---
-    const firebaseConfig = {
-      apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
-      authDomain: "cashflow-e8505.firebaseapp.com",
-      databaseURL: "https://cashflow-e8505-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "cashflow-e8505",
-      storageBucket: "cashflow-e8505.firebasestorage.app",
-      messagingSenderId: "841200170286",
-      appId: "1:841200170286:web:e418345aea281ca1eb36bf"
-    };
-
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
-    
-    let currentUser = null;
-    let saveTimeout = null;
-    let isEditMode = false; // ค่าเริ่มต้น: อ่านอย่างเดียว
-
-    // Default Data
-    const defaultIncomes = [
-      { name: "เงินเดือน (สุทธิ)", est: 11200, act: 11200 },
-      { name: "รายรับอื่นๆ A", est: 1100, act: 1100 },
-      { name: "รายรับอื่นๆ", est: 0, act: 0 }
-    ];
-
-    const defaultExpenses = [
-      { name: "ค่าอาหาร (25 วัน)", est: 1500, act: 1500 },
-      { name: "ค่าของใช้ในห้อง (7 วัน)", est: 350, act: 350 },
-      { name: "ค่าเดินทาง (หาร 2 คน)", est: 1000, act: 1000 },
-      { name: "ค่าของใช้ (ต่อเดือน)", est: 500, act: 500 },
-      { name: "เงินออม (บัญชีออมสิน)", est: 500, act: 500 }
-    ];
-
-    const defaultExtIncomes = [
-      { name: "เงินเดือน", val: 28000 },
-      { name: "บัตร Finnix", val: 500 },
-      { name: "บัตร Promise", val: 400 }
-    ];
-
-    const defaultExtExpenses = [
-      { name: "ให้ครอบครัว", val: 16000 },
-      { name: "ค่าเลี้ยงบุตร***", val: 800 }
-    ];
-
-    // --- THEME TOGGLE ---
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
-      document.getElementById('themeText').textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
-    }
-    document.documentElement.classList.add('dark');
-
-    // --- AUTHENTICATION ---
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch((err) => alert("ล็อกอินไม่สำเร็จ: " + err.message));
-    }
-
-    function logout() { auth.signOut(); }
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        currentUser = user;
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainDashboard').classList.remove('hidden');
-        
-        db.ref('users/' + user.uid + '/profile').update({
-          displayName: user.displayName || 'ผู้ใช้งาน MJ',
-          photoURL: user.photoURL || 'https://via.placeholder.com/150',
-          email: user.email
-        });
-
-        loadUserProfile(user.uid);
-        loadUserData(user.uid);
-      } else {
-        currentUser = null;
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('mainDashboard').classList.add('hidden');
-      }
-    });
-
-    // --- EDIT MODE TOGGLE ---
-    function toggleEditMode() {
-      isEditMode = !isEditMode;
-      applyEditState();
-    }
-
-    function applyEditState() {
-      const editBtn = document.getElementById('toggleEditBtn');
-      const editBtnText = document.getElementById('editBtnText');
-
-      if (isEditMode) {
-        editBtn.className = "bg-amber-500 text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1 shadow-lg animate-pulse";
-        editBtnText.textContent = "กำลังแก้ไข...";
-        document.querySelectorAll('.edit-only-btn').forEach(btn => btn.classList.remove('hidden'));
-      } else {
-        editBtn.className = "bg-stone-200 dark:bg-stone-700 hover:bg-amber-500 text-stone-700 dark:text-stone-200 hover:text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1";
-        editBtnText.textContent = "อ่านอย่างเดียว";
-        document.querySelectorAll('.edit-only-btn').forEach(btn => btn.classList.add('hidden'));
-      }
-
-      // ปรับการ disabled ของ input ทุกช่อง
-      document.querySelectorAll('#viewMyTable input').forEach(input => {
-        input.disabled = !isEditMode;
-        input.readOnly = !isEditMode;
-        if (!isEditMode) {
-          input.classList.add('cursor-not-allowed', 'opacity-70');
-        } else {
-          input.classList.remove('cursor-not-allowed', 'opacity-70');
-        }
-      });
-    }
-
-    // --- PROFILE MANAGEMENT ---
-    function loadUserProfile(uid) {
-      db.ref('users/' + uid + '/profile').once('value').then((snap) => {
-        const prof = snap.val() || {};
-        document.getElementById('userAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
-        document.getElementById('userNameDisplay').textContent = prof.displayName || 'ผู้ใช้งาน';
-        document.getElementById('userBioDisplay').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
-        
-        document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
-        document.getElementById('editBio').value = prof.bio || '';
-      });
-    }
-
-    function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
-    function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
-
-    function saveProfileSettings() {
-      if (!currentUser) return;
-      const newName = document.getElementById('editDisplayName').value;
-      const newBio = document.getElementById('editBio').value;
-
-      db.ref('users/' + currentUser.uid + '/profile').update({
-        displayName: newName,
-        bio: newBio
-      }).then(() => {
-        closeProfileModal();
-        loadUserProfile(currentUser.uid);
-        alert("บันทึกข้อมูลโปรไฟล์เรียบร้อยค่ะ!");
-      });
-    }
-
-    // --- TABS & NAVIGATION ---
-    function switchTab(tab) {
-      const btnMy = document.getElementById('tabMyTable');
-      const btnCom = document.getElementById('tabCommunity');
-      const viewMy = document.getElementById('viewMyTable');
-      const viewCom = document.getElementById('viewCommunity');
-
-      if (tab === 'myTable') {
-        btnMy.className = "bg-amber-500 text-stone-900 text-xs px-3 py-1.5 rounded-lg font-bold transition";
-        btnCom.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
-        viewMy.classList.remove('hidden');
-        viewCom.classList.add('hidden');
-      } else {
-        btnCom.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
-        btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-1.5 rounded-lg font-bold transition";
-        viewCom.classList.remove('hidden');
-        viewMy.classList.add('hidden');
-        loadCommunityMembers();
-      }
-    }
-
-    // --- COMMUNITY & POPUP MODAL ---
-    function loadCommunityMembers() {
-      const memberListEl = document.getElementById('memberList');
-      memberListEl.innerHTML = '<p class="text-xs text-stone-400">กำลังโหลดรายชื่อสมาชิก...</p>';
-
-      db.ref('users').once('value').then((snap) => {
-        const users = snap.val() || {};
-        memberListEl.innerHTML = '';
-
-        Object.keys(users).forEach(uid => {
-          const u = users[uid];
-          const prof = u.profile || {};
-          const name = prof.displayName || 'ผู้ใช้ไม่ระบุชื่อ';
-          const avatar = prof.photoURL || 'https://via.placeholder.com/150';
-          const bio = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
-          const isMe = currentUser && uid === currentUser.uid;
-
-          const card = document.createElement('div');
-          card.className = "bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-3 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500 transition shadow-sm";
-          card.onclick = () => openFriendTableModal(uid);
-
-          card.innerHTML = `
-            <div class="flex items-center gap-3">
-              <img src="${avatar}" class="w-10 h-10 rounded-full border border-amber-500 object-cover">
-              <div>
-                <p class="text-xs font-bold text-stone-800 dark:text-slate-100">${name} ${isMe ? '<span class="text-[10px] text-amber-500">(คุณ)</span>' : ''}</p>
-                <p class="text-[10px] text-stone-500 dark:text-stone-400 line-clamp-1">${bio}</p>
-              </div>
-            </div>
-            <span class="text-xs text-amber-500 font-bold">ส่องตาราง ➔</span>
-          `;
-          memberListEl.appendChild(card);
-        });
-      });
-    }
-
-    function openFriendTableModal(uid) {
-      db.ref('users/' + uid).once('value').then(snap => {
-        const user = snap.val() || {};
-        const prof = user.profile || {};
-        const data = user.data || {};
-
-        document.getElementById('friendAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
-        document.getElementById('friendName').textContent = prof.displayName || 'ผู้ใช้งาน';
-        document.getElementById('friendBio').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
-
-        renderFriendTableText(data);
-        document.getElementById('friendTableModal').classList.remove('hidden');
-      });
-    }
-
-    function closeFriendModal() { document.getElementById('friendTableModal').classList.add('hidden'); }
-
-    function renderFriendTableText(data) {
-      const incList = data.incomes || defaultIncomes;
-      const expList = data.expenses || defaultExpenses;
-      const extIncList = data.extIncomes || defaultExtIncomes;
-      const extExpList = data.extExpenses || defaultExtExpenses;
-
-      let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
-      let incHtml = incList.map(item => {
-        const est = item.est || 0; const act = item.act || 0; const diff = est - act;
-        totIncEst += est; totIncAct += act; totIncDiff += diff;
-        return `
-          <div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
-            <span class="col-span-5 text-emerald-500 font-semibold">${item.name || '-'}</span>
-            <span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
-            <span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
-            <span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
-          </div>`;
-      }).join('');
-
-      let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
-      let expHtml = expList.map(item => {
-        const est = item.est || 0; const act = item.act || 0; const diff = est - act;
-        totExpEst += est; totExpAct += act; totExpDiff += diff;
-        return `
-          <div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
-            <span class="col-span-5 text-amber-500 font-semibold">${item.name || '-'}</span>
-            <span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
-            <span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
-            <span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
-          </div>`;
-      }).join('');
-
-      let totalExtInc = 0;
-      let extIncHtml = extIncList.map(item => {
-        const val = item.val || 0; totalExtInc += val;
-        return `<div class="flex justify-between py-1"><span>${item.name || '-'}</span><span class="font-bold text-emerald-500">${val.toLocaleString('th-TH')}</span></div>`;
-      }).join('');
-
-      let totalExtExp = 0;
-      let extExpHtml = extExpList.map(item => {
-        const val = item.val || 0; totalExtExp += val;
-        return `<div class="flex justify-between py-1"><span>${item.name || '-'}</span><span class="font-bold text-rose-500">${val.toLocaleString('th-TH')}</span></div>`;
-      }).join('');
-
-      const grandTotalIncome = totIncAct + totalExtInc;
-      const grandTotalExpense = totExpAct + totalExtExp;
-      const grandTotalBalance = grandTotalIncome - grandTotalExpense;
-
-      const html = `
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <div class="lg:col-span-8 space-y-6">
-            <div class="space-y-1">
-              <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-2">
-                <span class="col-span-5">รายรับรายเดือน</span>
-                <span class="col-span-2 text-right">ประมาณ</span>
-                <span class="col-span-3 text-right">รับจริง</span>
-                <span class="col-span-2 text-right">ผลต่าง</span>
-              </div>
-              ${incHtml}
-              <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2">
-                <span class="col-span-5">ผลรวมรายรับหลัก</span>
-                <span class="col-span-2 text-right">${totIncEst.toLocaleString('th-TH')}</span>
-                <span class="col-span-3 text-right">${totIncAct.toLocaleString('th-TH')}</span>
-                <span class="col-span-2 text-right">${totIncDiff.toLocaleString('th-TH')}</span>
-              </div>
-            </div>
-
-            <div class="space-y-1 pt-4">
-              <div class="grid grid-cols-12 text-xs font-bold text-amber-500 border-b border-stone-200 dark:border-stone-700 pb-2">
-                <span class="col-span-5">รายจ่ายการทำงาน</span>
-                <span class="col-span-2 text-right">ประมาณ</span>
-                <span class="col-span-3 text-right">จ่ายจริง</span>
-                <span class="col-span-2 text-right">ผลต่าง</span>
-              </div>
-              ${expHtml}
-              <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2">
-                <span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
-                <span class="col-span-2 text-right">${totExpEst.toLocaleString('th-TH')}</span>
-                <span class="col-span-3 text-right">${totExpAct.toLocaleString('th-TH')}</span>
-                <span class="col-span-2 text-right">${totExpDiff.toLocaleString('th-TH')}</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="lg:col-span-4 space-y-4 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
-            <div class="space-y-2 text-xs">
-              <h3 class="font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
-              ${extIncHtml}
-              <div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-emerald-500">รวมรายรับเสริม:</span><span class="text-emerald-500">${totalExtInc.toLocaleString('th-TH')}</span></div>
-            </div>
-
-            <div class="space-y-2 text-xs pt-2 border-t border-stone-200 dark:border-stone-800">
-              <h3 class="font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
-              ${extExpHtml}
-              <div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-rose-500">รวมรายจ่ายไทย:</span><span class="text-rose-500">${totalExtExp.toLocaleString('th-TH')}</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
-          <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
-            <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-emerald-500">${grandTotalIncome.toLocaleString('th-TH')}</p></div>
-            <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-rose-500">${grandTotalExpense.toLocaleString('th-TH')}</p></div>
-            <div><p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p><p class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">${grandTotalBalance.toLocaleString('th-TH')}</p></div>
-          </div>
-        </div>
-      `;
-
-      document.getElementById('friendTableContent').innerHTML = html;
-    }
-
-    // --- SPREADSHEET RENDER & EDITING LOGIC ---
-    function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
-      const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
-      return `
-        <div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
-          <div class="col-span-5 flex items-center gap-1">
-            <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
-            <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name w-full bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
-          </div>
-          <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
-          <input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
-          <span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
-        </div>
-      `;
-    }
-
-    function createExtraRowHTML(type, data = { name: '', val: 0 }) {
-      const textColor = type === 'extIncome' ? 'text-emerald-500' : 'text-rose-500';
-      return `
-        <div class="flex justify-between items-center gap-1 ${type}-row">
-          <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
-          <input type="text" value="${data.name}" oninput="onDataChange()" placeholder="ชื่อรายการ..." class="row-name bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-          <input type="number" value="${data.val}" oninput="onDataChange()" class="row-val bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 ${textColor} font-bold focus:outline-none">
-        </div>
-      `;
-    }
-
-    function addRow(type) {
-      const box = document.getElementById(type === 'income' ? 'incomeRows' : 'expenseRows');
-      box.insertAdjacentHTML('beforeend', createRowHTML(type));
-      applyEditState();
-      onDataChange();
-    }
-
-    function addExtraRow(type) {
-      const box = document.getElementById(type === 'extIncome' ? 'extIncomeContainer' : 'extExpenseContainer');
-      box.insertAdjacentHTML('beforeend', createExtraRowHTML(type));
-      applyEditState();
-      onDataChange();
-    }
-
-    function removeRow(btnElement) {
-      const row = btnElement.closest('.income-row, .expense-row, .extIncome-row, .extExpense-row');
-      if (row) {
-        row.remove();
-        onDataChange();
-      }
-    }
-
-    function onDataChange() {
-      calculate();
-      triggerAutoSave();
-    }
-
-    function triggerAutoSave() {
-      if (!currentUser) return;
-      updateSaveStatus("กำลังบันทึก...", "bg-amber-900/50 text-amber-400");
-      clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => saveUserData(), 1000);
-    }
-
-    function saveUserData() {
-      if (!currentUser) return;
-
-      const incomes = [];
-      document.querySelectorAll('.income-row').forEach(row => {
-        incomes.push({
-          name: row.querySelector('.row-name').value,
-          est: parseFloat(row.querySelector('.row-est').value) || 0,
-          act: parseFloat(row.querySelector('.row-act').value) || 0
-        });
-      });
-
-      const expenses = [];
-      document.querySelectorAll('.expense-row').forEach(row => {
-        expenses.push({
-          name: row.querySelector('.row-name').value,
-          est: parseFloat(row.querySelector('.row-est').value) || 0,
-          act: parseFloat(row.querySelector('.row-act').value) || 0
-        });
-      });
-
-      const extIncomes = [];
-      document.querySelectorAll('.extIncome-row').forEach(row => {
-        extIncomes.push({
-          name: row.querySelector('.row-name').value,
-          val: parseFloat(row.querySelector('.row-val').value) || 0
-        });
-      });
-
-      const extExpenses = [];
-      document.querySelectorAll('.extExpense-row').forEach(row => {
-        extExpenses.push({
-          name: row.querySelector('.row-name').value,
-          val: parseFloat(row.querySelector('.row-val').value) || 0
-        });
-      });
-
-      db.ref('users/' + currentUser.uid + '/data').set({
-        incomes, expenses, extIncomes, extExpenses, updatedAt: Date.now()
-      }).then(() => {
-        updateSaveStatus("บันทึกแล้ว ✓", "bg-emerald-900/50 text-emerald-400");
-      }).catch(() => {
-        updateSaveStatus("บันทึกไม่สำเร็จ", "bg-rose-900/50 text-rose-400");
-      });
-    }
-
-    function loadUserData(targetUid) {
-      updateSaveStatus("กำลังโหลด...", "bg-stone-800 text-stone-400");
-
-      db.ref('users/' + targetUid + '/data').once('value').then((snapshot) => {
-        const data = snapshot.val();
-        const incBox = document.getElementById('incomeRows');
-        const expBox = document.getElementById('expenseRows');
-        const extIncBox = document.getElementById('extIncomeContainer');
-        const extExpBox = document.getElementById('extExpenseContainer');
-
-        if (data) {
-          incBox.innerHTML = (data.incomes || defaultIncomes).map(item => createRowHTML('income', item)).join('');
-          expBox.innerHTML = (data.expenses || defaultExpenses).map(item => createRowHTML('expense', item)).join('');
-          extIncBox.innerHTML = (data.extIncomes || defaultExtIncomes).map(item => createExtraRowHTML('extIncome', item)).join('');
-          extExpBox.innerHTML = (data.extExpenses || defaultExtExpenses).map(item => createExtraRowHTML('extExpense', item)).join('');
-        } else {
-          incBox.innerHTML = defaultIncomes.map(item => createRowHTML('income', item)).join('');
-          expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
-          extIncBox.innerHTML = defaultExtIncomes.map(item => createExtraRowHTML('extIncome', item)).join('');
-          extExpBox.innerHTML = defaultExtExpenses.map(item => createExtraRowHTML('extExpense', item)).join('');
-        }
-
-        applyEditState();
-        calculate();
-        updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
-      });
-    }
-
-    function updateSaveStatus(text, colorClass) {
-      const statusEl = document.getElementById('saveStatus');
-      statusEl.textContent = text;
-      statusEl.className = `text-[10px] px-2 py-0.5 rounded ${colorClass}`;
-    }
-
-    // --- CALCULATIONS LOGIC ---
-    function calculate() {
-      let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
-      document.querySelectorAll('.income-row').forEach(row => {
-        const est = parseFloat(row.querySelector('.row-est').value) || 0;
-        const act = parseFloat(row.querySelector('.row-act').value) || 0;
-        const diff = est - act;
-        row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
-        totIncEst += est; totIncAct += act; totIncDiff += diff;
-      });
-
-      document.getElementById('totIncEst').textContent = totIncEst.toLocaleString('th-TH');
-      document.getElementById('totIncAct').textContent = totIncAct.toLocaleString('th-TH');
-      document.getElementById('totIncDiff').textContent = totIncDiff.toLocaleString('th-TH');
-
-      let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
-      document.querySelectorAll('.expense-row').forEach(row => {
-        const est = parseFloat(row.querySelector('.row-est').value) || 0;
-        const act = parseFloat(row.querySelector('.row-act').value) || 0;
-        const diff = est - act;
-        row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
-        totExpEst += est; totExpAct += act; totExpDiff += diff;
-      });
-
-      document.getElementById('totExpEst').textContent = totExpEst.toLocaleString('th-TH');
-      document.getElementById('totExpAct').textContent = totExpAct.toLocaleString('th-TH');
-      document.getElementById('totExpDiff').textContent = totExpDiff.toLocaleString('th-TH');
-
-      let totalExtInc = 0;
-      document.querySelectorAll('.extIncome-row').forEach(row => {
-        totalExtInc += parseFloat(row.querySelector('.row-val').value) || 0;
-      });
-
-      let totalExtExp = 0;
-      document.querySelectorAll('.extExpense-row').forEach(row => {
-        totalExtExp += parseFloat(row.querySelector('.row-val').value) || 0;
-      });
-
-      document.getElementById('subTotalExtInc').textContent = totalExtInc.toLocaleString('th-TH');
-      document.getElementById('subTotalExtExp').textContent = totalExtExp.toLocaleString('th-TH');
-
-      const grandTotalIncome = totIncAct + totalExtInc;
-      const grandTotalExpense = totExpAct + totalExtExp;
-      const grandTotalBalance = grandTotalIncome - grandTotalExpense;
-
-      document.getElementById('finalTotalIncome').textContent = grandTotalIncome.toLocaleString('th-TH');
-      document.getElementById('finalTotalExpense').textContent = grandTotalExpense.toLocaleString('th-TH');
-      document.getElementById('finalBalance').textContent = grandTotalBalance.toLocaleString('th-TH');
-    }
-  </script>
+<div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
+<div class="flex items-center gap-2">
+<span class="text-2xl">📊</span>
+<h1 class="text-lg font-bold text-amber-500">MJ Cashflow Community</h1>
+</div>
+<button onclick="toggleTheme()" class="p-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-amber-400 font-bold text-xs flex items-center gap-1 shadow">
+<span id="themeIcon">☀️</span> <span id="themeText">โหมดสว่าง</span>
+</button>
+</div>
+
+<div id="loginScreen" class="max-w-md mx-auto my-16 bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-6">
+<div class="space-y-2">
+<h1 class="text-2xl font-bold text-amber-500">📊 MJ Cashflow System</h1>
+<p class="text-xs text-stone-500 dark:text-stone-400">เข้าสู่ระบบเพื่อจัดการงบประมาณและแชร์ตารางร่วมกับเพื่อนๆ</p>
+</div>
+
+<button id="googleLoginBtn" onclick="loginWithGoogle()" class="w-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:opacity-90 transition shadow-lg">
+<svg class="w-5 h-5" viewBox="0 0 24 24">
+<path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+<path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+<path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+<path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+</svg>
+เข้าสู่ระบบด้วย Google
+</button>
+</div>
+
+<div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
+
+<div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
+<div class="flex items-center gap-3">
+<img id="userAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Profile">
+<div>
+<div class="flex items-center gap-2">
+<h2 id="userNameDisplay" class="font-bold text-base text-stone-800 dark:text-slate-100">...</h2>
+<span id="saveStatus" class="text-[10px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">พร้อมใช้งาน</span>
+</div>
+<p id="userBioDisplay" class="text-xs text-stone-500 dark:text-stone-400 italic">ไม่มีคำอธิบายโปรไฟล์</p>
+</div>
+</div>
+
+<div class="flex flex-wrap items-center gap-2">
+<div class="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
+<button onclick="switchTab('myTable')" id="tabMyTable" class="bg-amber-500 text-stone-900 text-xs px-3 py-1.5 rounded-lg font-bold transition">
+📋 ตารางของฉัน
+</button>
+<button id="toggleEditBtn" onclick="toggleEditMode()" title="สลับโหมดแก้ไข" class="bg-stone-200 dark:bg-stone-700 hover:bg-amber-500 text-stone-700 dark:text-stone-200 hover:text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1">
+✏️ <span id="editBtnText" class="text-[11px]">อ่านอย่างเดียว</span>
+</button>
+</div>
+
+<button onclick="switchTab('community')" id="tabCommunity" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
+👥 สมาชิกทั้งหมด
+</button>
+<button onclick="openProfileModal()" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
+⚙️ ตั้งค่าโปรไฟล์
+</button>
+<button onclick="logout()" class="bg-rose-600/10 text-rose-500 hover:bg-rose-600 hover:text-white text-xs px-3 py-2 rounded-xl font-bold transition">
+ออกจากระบบ
+</button>
+</div>
+</div>
+
+<div id="viewMyTable" class="space-y-6">
+
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<div class="lg:col-span-8 space-y-6">
+
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-2">
+<div class="text-xs font-bold text-emerald-500 flex items-center gap-2">
+<span>รายรับรายเดือน</span>
+<button onclick="addRow('income')" class="edit-only-btn hidden bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded font-bold transition">+ เพิ่มแถว</button>
+</div>
+<div class="grid grid-cols-7 gap-2 text-xs font-bold text-emerald-500 text-right w-1/2">
+<span class="col-span-3">ประมาณ</span>
+<span class="col-span-4">รับจริง</span>
+</div>
+</div>
+<div id="incomeRows" class="space-y-2"></div>
+<div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2 border-t border-stone-200 dark:border-stone-700">
+<span class="col-span-5">ผลรวมรายรับหลัก</span>
+<span id="totIncEst" class="col-span-2 text-right">0</span>
+<span id="totIncAct" class="col-span-3 text-right">0</span>
+<span id="totIncDiff" class="col-span-2 text-right">0</span>
+</div>
+</div>
+
+<div class="space-y-2 pt-4">
+<div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-2">
+<div class="text-xs font-bold text-amber-500 flex items-center gap-2">
+<span>รายจ่ายการทำงาน</span>
+<button onclick="addRow('expense')" class="edit-only-btn hidden bg-rose-600 hover:bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded font-bold transition">+ เพิ่มแถว</button>
+</div>
+<div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-500 text-right w-1/2">
+<span class="col-span-3">ประมาณ</span>
+<span class="col-span-4">จ่ายจริง</span>
+</div>
+</div>
+<div id="expenseRows" class="space-y-2"></div>
+<div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2 border-t border-stone-200 dark:border-stone-700">
+<span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
+<span id="totExpEst" class="col-span-2 text-right">0</span>
+<span id="totExpAct" class="col-span-3 text-right">0</span>
+<span id="totExpDiff" class="col-span-2 text-right">0</span>
+</div>
+</div>
+
+</div>
+
+<div class="lg:col-span-4 space-y-6 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+
+<div class="space-y-2">
+<div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-1">
+<h3 class="text-xs font-bold text-emerald-500">รายรับ/ต่อเดือน (เสริม)</h3>
+<button onclick="addExtraRow('extIncome')" class="edit-only-btn hidden bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
+</div>
+<div id="extIncomeContainer" class="space-y-2 text-xs"></div>
+<div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
+<span class="text-emerald-500">รวมรายรับเสริม:</span>
+<span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
+</div>
+</div>
+
+<div class="space-y-2 pt-4 border-t border-stone-200 dark:border-stone-800">
+<div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-1">
+<h3 class="text-xs font-bold text-rose-500">รายจ่ายฝั่งไทย</h3>
+<button onclick="addExtraRow('extExpense')" class="edit-only-btn hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
+</div>
+<div id="extExpenseContainer" class="space-y-2 text-xs"></div>
+<div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
+<span class="text-rose-500">รวมรายจ่ายไทย:</span>
+<span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
+</div>
+</div>
+
+</div>
+</div>
+
+<div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
+<div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
+<div>
+<p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด (หลัก + เสริม)</p>
+<p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-500">0</p>
+</div>
+<div>
+<p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด (หลัก + ไทย)</p>
+<p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-500">0</p>
+</div>
+<div>
+<p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p>
+<p id="finalBalance" class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">0</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="viewCommunity" class="hidden space-y-4">
+<h3 class="text-sm font-bold text-amber-500">👥 สมาชิกทั้งหมดในระบบ (คลิกที่ชื่อเพื่อส่องตารางการเงิน)</h3>
+<div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
+</div>
+
+</div>
+
+<div id="friendTableModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
+<div class="bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 max-w-5xl w-full my-auto space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+<button onclick="closeFriendModal()" class="absolute top-4 right-4 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 p-2 rounded-full font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+
+<div class="flex items-center gap-3 border-b border-stone-200 dark:border-stone-800 pb-4">
+<img id="friendAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Friend Profile">
+<div>
+<div class="flex items-center gap-2">
+<h2 id="friendName" class="font-bold text-base text-stone-800 dark:text-slate-100">...</h2>
+<span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/20 text-amber-500 font-bold">🔒 อ่านได้อย่างเดียว</span>
+</div>
+<p id="friendBio" class="text-xs text-stone-500 dark:text-stone-400 italic">ไม่มีคำอธิบายโปรไฟล์</p>
+</div>
+</div>
+
+<div id="friendTableContent" class="space-y-6"></div>
+</div>
+</div>
+
+<div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+<div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+<h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่าโปรไฟล์ส่วนตัว</h3>
+<div class="space-y-3 text-xs">
+<div>
+<label class="block text-stone-500 dark:text-stone-400 mb-1">ชื่อที่แสดง (Display Name)</label>
+<input type="text" id="editDisplayName" class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none">
+</div>
+<div>
+<label class="block text-stone-500 dark:text-stone-400 mb-1">คำอธิบายโปรไฟล์ (Bio)</label>
+<textarea id="editBio" rows="3" placeholder="เขียนสโลแกนหรือการเงินสไตล์คุณ..." class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none"></textarea>
+</div>
+</div>
+<div class="flex justify-end gap-2 pt-2">
+<button onclick="closeProfileModal()" class="px-4 py-2 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs rounded-xl font-bold">ยกเลิก</button>
+<button onclick="saveProfileSettings()" class="px-4 py-2 bg-amber-500 text-stone-900 text-xs rounded-xl font-bold">บันทึกเปลี่ยนแปลง</button>
+</div>
+</div>
+</div>
+
+<script>
+// --- FIREBASE CONFIG ---
+const firebaseConfig = {
+apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
+authDomain: "cashflow-e8505.firebaseapp.com",
+databaseURL: "https://cashflow-e8505-default-rtdb.asia-southeast1.firebasedatabase.app",
+projectId: "cashflow-e8505",
+storageBucket: "cashflow-e8505.firebasestorage.app",
+messagingSenderId: "841200170286",
+appId: "1:841200170286:web:e418345aea281ca1eb36bf"
+};
+
+if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let currentUser = null;
+let saveTimeout = null;
+let isEditMode = false; // ค่าเริ่มต้น: อ่านอย่างเดียว
+
+// Default Data
+const defaultIncomes = [
+{ name: "เงินเดือน (สุทธิ)", est: 11200, act: 11200 },
+{ name: "รายรับอื่นๆ A", est: 1100, act: 1100 },
+{ name: "รายรับอื่นๆ", est: 0, act: 0 }
+];
+
+const defaultExpenses = [
+{ name: "ค่าอาหาร (25 วัน)", est: 1500, act: 1500 },
+{ name: "ค่าของใช้ในห้อง (7 วัน)", est: 350, act: 350 },
+{ name: "ค่าเดินทาง (หาร 2 คน)", est: 1000, act: 1000 },
+{ name: "ค่าของใช้ (ต่อเดือน)", est: 500, act: 500 },
+{ name: "เงินออม (บัญชีออมสิน)", est: 500, act: 500 }
+];
+
+const defaultExtIncomes = [
+{ name: "เงินเดือน", val: 28000 },
+{ name: "บัตร Finnix", val: 500 },
+{ name: "บัตร Promise", val: 400 }
+];
+
+const defaultExtExpenses = [
+{ name: "ให้ครอบครัว", val: 16000 },
+{ name: "ค่าเลี้ยงบุตร***", val: 800 }
+];
+
+// --- THEME TOGGLE ---
+function toggleTheme() {
+const isDark = document.documentElement.classList.toggle('dark');
+document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+document.getElementById('themeText').textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
+}
+document.documentElement.classList.add('dark');
+
+// --- AUTHENTICATION ---
+function loginWithGoogle() {
+const provider = new firebase.auth.GoogleAuthProvider();
+auth.signInWithPopup(provider).catch((err) => alert("ล็อกอินไม่สำเร็จ: " + err.message));
+}
+
+function logout() { auth.signOut(); }
+
+auth.onAuthStateChanged((user) => {
+if (user) {
+currentUser = user;
+document.getElementById('loginScreen').classList.add('hidden');
+document.getElementById('mainDashboard').classList.remove('hidden');
+
+db.ref('users/' + user.uid + '/profile').update({
+displayName: user.displayName || 'ผู้ใช้งาน MJ',
+photoURL: user.photoURL || 'https://via.placeholder.com/150',
+email: user.email
+});
+
+loadUserProfile(user.uid);
+loadUserData(user.uid);
+} else {
+currentUser = null;
+document.getElementById('loginScreen').classList.remove('hidden');
+document.getElementById('mainDashboard').classList.add('hidden');
+}
+});
+
+// --- EDIT MODE TOGGLE ---
+function toggleEditMode() {
+isEditMode = !isEditMode;
+applyEditState();
+}
+
+function applyEditState() {
+const editBtn = document.getElementById('toggleEditBtn');
+const editBtnText = document.getElementById('editBtnText');
+
+if (isEditMode) {
+editBtn.className = "bg-amber-500 text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1 shadow-lg animate-pulse";
+editBtnText.textContent = "กำลังแก้ไข...";
+document.querySelectorAll('.edit-only-btn').forEach(btn => btn.classList.remove('hidden'));
+} else {
+editBtn.className = "bg-stone-200 dark:bg-stone-700 hover:bg-amber-500 text-stone-700 dark:text-stone-200 hover:text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1";
+editBtnText.textContent = "อ่านอย่างเดียว";
+document.querySelectorAll('.edit-only-btn').forEach(btn => btn.classList.add('hidden'));
+}
+
+// ปรับการ disabled ของ input ทุกช่อง
+document.querySelectorAll('#viewMyTable input').forEach(input => {
+input.disabled = !isEditMode;
+input.readOnly = !isEditMode;
+if (!isEditMode) {
+input.classList.add('cursor-not-allowed', 'opacity-70');
+} else {
+input.classList.remove('cursor-not-allowed', 'opacity-70');
+}
+});
+}
+
+// --- PROFILE MANAGEMENT ---
+function loadUserProfile(uid) {
+db.ref('users/' + uid + '/profile').once('value').then((snap) => {
+const prof = snap.val() || {};
+document.getElementById('userAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
+document.getElementById('userNameDisplay').textContent = prof.displayName || 'ผู้ใช้งาน';
+document.getElementById('userBioDisplay').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
+
+document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
+document.getElementById('editBio').value = prof.bio || '';
+});
+}
+
+function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
+function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
+
+function saveProfileSettings() {
+if (!currentUser) return;
+const newName = document.getElementById('editDisplayName').value;
+const newBio = document.getElementById('editBio').value;
+
+db.ref('users/' + currentUser.uid + '/profile').update({
+displayName: newName,
+bio: newBio
+}).then(() => {
+closeProfileModal();
+loadUserProfile(currentUser.uid);
+alert("บันทึกข้อมูลโปรไฟล์เรียบร้อยค่ะ!");
+});
+}
+
+// --- TABS & NAVIGATION ---
+function switchTab(tab) {
+const btnMy = document.getElementById('tabMyTable');
+const btnCom = document.getElementById('tabCommunity');
+const viewMy = document.getElementById('viewMyTable');
+const viewCom = document.getElementById('viewCommunity');
+
+if (tab === 'myTable') {
+btnMy.className = "bg-amber-500 text-stone-900 text-xs px-3 py-1.5 rounded-lg font-bold transition";
+btnCom.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
+viewMy.classList.remove('hidden');
+viewCom.classList.add('hidden');
+} else {
+btnCom.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
+btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-1.5 rounded-lg font-bold transition";
+viewCom.classList.remove('hidden');
+viewMy.classList.add('hidden');
+loadCommunityMembers();
+}
+}
+
+// --- COMMUNITY & POPUP MODAL ---
+function loadCommunityMembers() {
+const memberListEl = document.getElementById('memberList');
+memberListEl.innerHTML = '<p class="text-xs text-stone-400">กำลังโหลดรายชื่อสมาชิก...</p>';
+
+db.ref('users').once('value').then((snap) => {
+const users = snap.val() || {};
+memberListEl.innerHTML = '';
+
+Object.keys(users).forEach(uid => {
+const u = users[uid];
+const prof = u.profile || {};
+const name = prof.displayName || 'ผู้ใช้ไม่ระบุชื่อ';
+const avatar = prof.photoURL || 'https://via.placeholder.com/150';
+const bio = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
+const isMe = currentUser && uid === currentUser.uid;
+
+const card = document.createElement('div');
+card.className = "bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-3 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500 transition shadow-sm";
+card.onclick = () => openFriendTableModal(uid);
+
+card.innerHTML = `
+<div class="flex items-center gap-3">
+<img src="${avatar}" class="w-10 h-10 rounded-full border border-amber-500 object-cover">
+<div>
+<p class="text-xs font-bold text-stone-800 dark:text-slate-100">${name} ${isMe ? '<span class="text-[10px] text-amber-500">(คุณ)</span>' : ''}</p>
+<p class="text-[10px] text-stone-500 dark:text-stone-400 line-clamp-1">${bio}</p>
+</div>
+</div>
+<span class="text-xs text-amber-500 font-bold">ส่องตาราง ➔</span>
+`;
+memberListEl.appendChild(card);
+});
+});
+}
+
+function openFriendTableModal(uid) {
+db.ref('users/' + uid).once('value').then(snap => {
+const user = snap.val() || {};
+const prof = user.profile || {};
+const data = user.data || {};
+
+document.getElementById('friendAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
+document.getElementById('friendName').textContent = prof.displayName || 'ผู้ใช้งาน';
+document.getElementById('friendBio').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
+
+renderFriendTableText(data);
+document.getElementById('friendTableModal').classList.remove('hidden');
+});
+}
+
+function closeFriendModal() { document.getElementById('friendTableModal').classList.add('hidden'); }
+
+function renderFriendTableText(data) {
+const incList = data.incomes || defaultIncomes;
+const expList = data.expenses || defaultExpenses;
+const extIncList = data.extIncomes || defaultExtIncomes;
+const extExpList = data.extExpenses || defaultExtExpenses;
+
+let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
+let incHtml = incList.map(item => {
+const est = Number(item.est) || 0; const act = Number(item.act) || 0; const diff = est - act;
+totIncEst += est; totIncAct += act; totIncDiff += diff;
+return `
+<div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
+<span class="col-span-5 text-emerald-500 font-semibold">${item.name || '-'}</span>
+<span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
+<span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
+<span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
+</div>`;
+}).join('');
+
+let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
+let expHtml = expList.map(item => {
+const est = Number(item.est) || 0; const act = Number(item.act) || 0; const diff = est - act;
+totExpEst += est; totExpAct += act; totExpDiff += diff;
+return `
+<div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
+<span class="col-span-5 text-amber-500 font-semibold">${item.name || '-'}</span>
+<span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
+<span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
+<span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
+</div>`;
+}).join('');
+
+let totalExtInc = 0;
+let extIncHtml = extIncList.map(item => {
+const val = Number(item.val) || 0; 
+totalExtInc += val; // บวกสะสมค่ารายรับเสริม
+return `<div class="flex justify-between py-1"><span>${item.name || '-'}</span><span class="font-bold text-emerald-500">${val.toLocaleString('th-TH')}</span></div>`;
+}).join('');
+
+let totalExtExp = 0;
+let extExpHtml = extExpList.map(item => {
+const val = Number(item.val) || 0; 
+totalExtExp += val; // บวกสะสมค่ารายจ่ายไทย
+return `<div class="flex justify-between py-1"><span>${item.name || '-'}</span><span class="font-bold text-rose-500">${val.toLocaleString('th-TH')}</span></div>`;
+}).join('');
+
+// คำนวณผลรวมทั้งหมดแบบสุทธิ (หลัก + เสริม / หลัก + ไทย)
+const grandTotalIncome = totIncAct + totalExtInc;
+const grandTotalExpense = totExpAct + totalExtExp;
+const grandTotalBalance = grandTotalIncome - grandTotalExpense;
+
+const html = `
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<div class="lg:col-span-8 space-y-6">
+<div class="space-y-1">
+<div class="grid grid-cols-12 text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-2">
+<span class="col-span-5">รายรับรายเดือน</span>
+<span class="col-span-2 text-right">ประมาณ</span>
+<span class="col-span-3 text-right">รับจริง</span>
+<span class="col-span-2 text-right">ผลต่าง</span>
+</div>
+${incHtml}
+<div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2">
+<span class="col-span-5">ผลรวมรายรับหลัก</span>
+<span class="col-span-2 text-right">${totIncEst.toLocaleString('th-TH')}</span>
+<span class="col-span-3 text-right">${totIncAct.toLocaleString('th-TH')}</span>
+<span class="col-span-2 text-right">${totIncDiff.toLocaleString('th-TH')}</span>
+</div>
+</div>
+
+<div class="space-y-1 pt-4">
+<div class="grid grid-cols-12 text-xs font-bold text-amber-500 border-b border-stone-200 dark:border-stone-700 pb-2">
+<span class="col-span-5">รายจ่ายการทำงาน</span>
+<span class="col-span-2 text-right">ประมาณ</span>
+<span class="col-span-3 text-right">จ่ายจริง</span>
+<span class="col-span-2 text-right">ผลต่าง</span>
+</div>
+${expHtml}
+<div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2">
+<span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
+<span class="col-span-2 text-right">${totExpEst.toLocaleString('th-TH')}</span>
+<span class="col-span-3 text-right">${totExpAct.toLocaleString('th-TH')}</span>
+<span class="col-span-2 text-right">${totExpDiff.toLocaleString('th-TH')}</span>
+</div>
+</div>
+</div>
+
+<div class="lg:col-span-4 space-y-4 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+<div class="space-y-2 text-xs">
+<h3 class="font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน (เสริม)</h3>
+${extIncHtml}
+<div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-emerald-500">รวมรายรับเสริม:</span><span class="text-emerald-500">${totalExtInc.toLocaleString('th-TH')}</span></div>
+</div>
+
+<div class="space-y-2 text-xs pt-2 border-t border-stone-200 dark:border-stone-800">
+<h3 class="font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
+${extExpHtml}
+<div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-rose-500">รวมรายจ่ายไทย:</span><span class="text-rose-500">${totalExtExp.toLocaleString('th-TH')}</span></div>
+</div>
+</div>
+</div>
+
+<div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
+<div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
+<div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด (หลัก + เสริม)</p><p class="text-lg sm:text-2xl font-extrabold text-emerald-500">${grandTotalIncome.toLocaleString('th-TH')}</p></div>
+<div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด (หลัก + ไทย)</p><p class="text-lg sm:text-2xl font-extrabold text-rose-500">${grandTotalExpense.toLocaleString('th-TH')}</p></div>
+<div><p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p><p class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">${grandTotalBalance.toLocaleString('th-TH')}</p></div>
+</div>
+</div>
+`;
+
+document.getElementById('friendTableContent').innerHTML = html;
+}
+
+// --- SPREADSHEET RENDER & EDITING LOGIC ---
+function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
+const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
+return `
+<div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
+<div class="col-span-5 flex items-center gap-1">
+<button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
+<input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name w-full bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
+</div>
+<input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+<input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+<span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
+</div>
+`;
+}
+
+function createExtraRowHTML(type, data = { name: '', val: 0 }) {
+const textColor = type === 'extIncome' ? 'text-emerald-500' : 'text-rose-500';
+return `
+<div class="flex justify-between items-center gap-1 ${type}-row">
+<button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
+<input type="text" value="${data.name}" oninput="onDataChange()" placeholder="ชื่อรายการ..." class="row-name bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+<input type="number" value="${data.val}" oninput="onDataChange()" class="row-val bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 ${textColor} font-bold focus:outline-none">
+</div>
+`;
+}
+
+function addRow(type) {
+const box = document.getElementById(type === 'income' ? 'incomeRows' : 'expenseRows');
+box.insertAdjacentHTML('beforeend', createRowHTML(type));
+applyEditState();
+onDataChange();
+}
+
+function addExtraRow(type) {
+const box = document.getElementById(type === 'extIncome' ? 'extIncomeContainer' : 'extExpenseContainer');
+box.insertAdjacentHTML('beforeend', createExtraRowHTML(type));
+applyEditState();
+onDataChange();
+}
+
+function removeRow(btnElement) {
+const row = btnElement.closest('.income-row, .expense-row, .extIncome-row, .extExpense-row');
+if (row) {
+row.remove();
+onDataChange();
+}
+}
+
+function onDataChange() {
+calculate();
+triggerAutoSave();
+}
+
+function triggerAutoSave() {
+if (!currentUser) return;
+updateSaveStatus("กำลังบันทึก...", "bg-amber-900/50 text-amber-400");
+clearTimeout(saveTimeout);
+saveTimeout = setTimeout(() => saveUserData(), 1000);
+}
+
+function saveUserData() {
+if (!currentUser) return;
+
+const incomes = [];
+document.querySelectorAll('.income-row').forEach(row => {
+incomes.push({
+name: row.querySelector('.row-name').value,
+est: parseFloat(row.querySelector('.row-est').value) || 0,
+act: parseFloat(row.querySelector('.row-act').value) || 0
+});
+});
+
+const expenses = [];
+document.querySelectorAll('.expense-row').forEach(row => {
+expenses.push({
+name: row.querySelector('.row-name').value,
+est: parseFloat(row.querySelector('.row-est').value) || 0,
+act: parseFloat(row.querySelector('.row-act').value) || 0
+});
+});
+
+const extIncomes = [];
+document.querySelectorAll('.extIncome-row').forEach(row => {
+extIncomes.push({
+name: row.querySelector('.row-name').value,
+val: parseFloat(row.querySelector('.row-val').value) || 0
+});
+});
+
+const extExpenses = [];
+document.querySelectorAll('.extExpense-row').forEach(row => {
+extExpenses.push({
+name: row.querySelector('.row-name').value,
+val: parseFloat(row.querySelector('.row-val').value) || 0
+});
+});
+
+db.ref('users/' + currentUser.uid + '/data').set({
+incomes, expenses, extIncomes, extExpenses, updatedAt: Date.now()
+}).then(() => {
+updateSaveStatus("บันทึกแล้ว ✓", "bg-emerald-900/50 text-emerald-400");
+}).catch(() => {
+updateSaveStatus("บันทึกไม่สำเร็จ", "bg-rose-900/50 text-rose-400");
+});
+}
+
+function loadUserData(targetUid) {
+updateSaveStatus("กำลังโหลด...", "bg-stone-800 text-stone-400");
+
+db.ref('users/' + targetUid + '/data').once('value').then((snapshot) => {
+const data = snapshot.val();
+const incBox = document.getElementById('incomeRows');
+const expBox = document.getElementById('expenseRows');
+const extIncBox = document.getElementById('extIncomeContainer');
+const extExpBox = document.getElementById('extExpenseContainer');
+
+if (data) {
+incBox.innerHTML = (data.incomes || defaultIncomes).map(item => createRowHTML('income', item)).join('');
+expBox.innerHTML = (data.expenses || defaultExpenses).map(item => createRowHTML('expense', item)).join('');
+extIncBox.innerHTML = (data.extIncomes || defaultExtIncomes).map(item => createExtraRowHTML('extIncome', item)).join('');
+extExpBox.innerHTML = (data.extExpenses || defaultExtExpenses).map(item => createExtraRowHTML('extExpense', item)).join('');
+} else {
+incBox.innerHTML = defaultIncomes.map(item => createRowHTML('income', item)).join('');
+expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
+extIncBox.innerHTML = defaultExtIncomes.map(item => createExtraRowHTML('extIncome', item)).join('');
+extExpBox.innerHTML = defaultExtExpenses.map(item => createExtraRowHTML('extExpense', item)).join('');
+}
+
+applyEditState();
+calculate();
+updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
+});
+}
+
+function updateSaveStatus(text, colorClass) {
+const statusEl = document.getElementById('saveStatus');
+statusEl.textContent = text;
+statusEl.className = `text-[10px] px-2 py-0.5 rounded ${colorClass}`;
+}
+
+// --- CALCULATIONS LOGIC ---
+function calculate() {
+let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
+document.querySelectorAll('.income-row').forEach(row => {
+const est = parseFloat(row.querySelector('.row-est').value) || 0;
+const act = parseFloat(row.querySelector('.row-act').value) || 0;
+const diff = est - act;
+row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
+totIncEst += est; totIncAct += act; totIncDiff += diff;
+});
+
+document.getElementById('totIncEst').textContent = totIncEst.toLocaleString('th-TH');
+document.getElementById('totIncAct').textContent = totIncAct.toLocaleString('th-TH');
+document.getElementById('totIncDiff').textContent = totIncDiff.toLocaleString('th-TH');
+
+let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
+document.querySelectorAll('.expense-row').forEach(row => {
+const est = parseFloat(row.querySelector('.row-est').value) || 0;
+const act = parseFloat(row.querySelector('.row-act').value) || 0;
+const diff = est - act;
+row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
+totExpEst += est; totExpAct += act; totExpDiff += diff;
+});
+
+document.getElementById('totExpEst').textContent = totExpEst.toLocaleString('th-TH');
+document.getElementById('totExpAct').textContent = totExpAct.toLocaleString('th-TH');
+document.getElementById('totExpDiff').textContent = totExpDiff.toLocaleString('th-TH');
+
+// 1. คำนวณผลรวมรายรับเสริม
+let totalExtInc = 0;
+document.querySelectorAll('.extIncome-row').forEach(row => {
+totalExtInc += parseFloat(row.querySelector('.row-val').value) || 0;
+});
+
+// 2. คำนวณผลรวมรายจ่ายไทย
+let totalExtExp = 0;
+document.querySelectorAll('.extExpense-row').forEach(row => {
+totalExtExp += parseFloat(row.querySelector('.row-val').value) || 0;
+});
+
+// แสดงผลย่อย
+document.getElementById('subTotalExtInc').textContent = totalExtInc.toLocaleString('th-TH');
+document.getElementById('subTotalExtExp').textContent = totalExtExp.toLocaleString('th-TH');
+
+// 3. รวมยอดทั้งหมดส่งลงช่องสรุปข้างล่าง
+const grandTotalIncome = totIncAct + totalExtInc;   // รายรับจริงหลัก + รายรับเสริม
+const grandTotalExpense = totExpAct + totalExtExp; // รายจ่ายจริงหลัก + รายจ่ายไทย
+const grandTotalBalance = grandTotalIncome - grandTotalExpense; // คงเหลือสุทธิ
+
+document.getElementById('finalTotalIncome').textContent = grandTotalIncome.toLocaleString('th-TH');
+document.getElementById('finalTotalExpense').textContent = grandTotalExpense.toLocaleString('th-TH');
+document.getElementById('finalBalance').textContent = grandTotalBalance.toLocaleString('th-TH');
+}
+</script>
 </body>
 </html>
