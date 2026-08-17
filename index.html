@@ -4,16 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>แอปรายรับ-รายจ่าย - MJ</title>
+
+  <!-- PWA Settings -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0284c7">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2382/2382461.png">
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800">
+<body class="bg-slate-100 min-h-screen text-slate-800 pb-10">
 
   <div class="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
     <!-- Header -->
-    <header class="text-center py-4 bg-white rounded-2xl shadow-sm border border-slate-200">
-      <h1 class="text-2xl md:text-3xl font-bold text-sky-600">💰 ระบบบันทึกรายรับ - รายจ่าย</h1>
-      <p class="text-slate-500 text-sm mt-1">จัดการการเงินใกล้มือคุณ</p>
+    <header class="text-center py-4 bg-white rounded-2xl shadow-sm border border-slate-200 relative">
+      <h1 class="text-2xl md:text-3xl font-bold text-sky-600">💰 รายรับ - รายจ่าย</h1>
+      <p class="text-slate-500 text-sm mt-1">จัดการการเงินใกล้มือคุณ (MJ Edition)</p>
+      <!-- ปุ่มติดตั้ง PWA -->
+      <button id="installBtn" class="hidden absolute top-4 right-4 bg-sky-500 text-white text-xs px-3 py-1.5 rounded-xl font-medium shadow hover:bg-sky-600 transition">
+        📲 ติดตั้งแอป
+      </button>
     </header>
 
     <!-- สรุปรวมส่วนต่าง (Dashboard) -->
@@ -76,7 +86,7 @@
 
         <div>
           <label class="block text-sm text-slate-600 mb-1">รายละเอียด / หมายเหตุ</label>
-          <input type="text" id="title" required placeholder="เช่น ค่าข้าวเช้า, เงินเดือน" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
+          <input type="text" id="title" required placeholder="เช่น ค่าข้าว, เงินเดือน" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
         </div>
 
         <div>
@@ -115,30 +125,30 @@
     </section>
   </div>
 
-  <!-- Firebase Scripts (Modular SDK v10) -->
+  <!-- Firebase Scripts (Modular SDK v10 - Realtime Database) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
-      getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      getDatabase, ref, push, onValue, remove 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // 🔴 1. วาง Firebase Config ของ MJ ตรงนี้เลยค่ะ
+    // Firebase Config ของ MJ
     const firebaseConfig = {
-  apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
-  authDomain: "cashflow-e8505.firebaseapp.com",
-  databaseURL: "https://cashflow-e8505-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "cashflow-e8505",
-  storageBucket: "cashflow-e8505.firebasestorage.app",
-  messagingSenderId: "841200170286",
-  appId: "1:841200170286:web:e418345aea281ca1eb36bf"
-};
+      apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
+      authDomain: "cashflow-e8505.firebaseapp.com",
+      databaseURL: "https://cashflow-e8505-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "cashflow-e8505",
+      storageBucket: "cashflow-e8505.firebasestorage.app",
+      messagingSenderId: "841200170286",
+      appId: "1:841200170286:web:e418345aea281ca1eb36bf"
+    };
 
-    // Initialize Firebase
+    // Initialize Firebase Realtime Database
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const transCollection = collection(db, "transactions");
+    const db = getDatabase(app);
+    const transRef = ref(db, "transactions");
 
-    // หมวดหมู่เริ่มต้น (สามารถเพิ่มเพิ่มหมวดหมู่ตรงนี้ได้ง่ายๆ เลย)
+    // หมวดหมู่
     const categories = {
       income: ["เงินเดือน", "โบนัส", "ธุรกิจส่วนตัว", "การลงทุน", "อื่นๆ"],
       expense: ["อาหาร/เครื่องดื่ม", "การเดินทาง", "ที่พัก/ค่าน้ำค่าไฟ", "ช้อปปิ้ง", "ความบันเทิง", "อื่นๆ"]
@@ -157,7 +167,7 @@
     const filterMonth = document.getElementById("filterMonth");
     const filterYear = document.getElementById("filterYear");
 
-    // ตั้งค่า วันที่ปัจจุบัน เป็นค่าเริ่มต้น
+    // ตั้งค่า วันที่ปัจจุบัน
     const today = new Date().toISOString().split("T")[0];
     dateInput.value = today;
     filterDate.value = today;
@@ -166,7 +176,7 @@
 
     let allTransactions = [];
 
-    // เปลี่ยนหมวดหมู่ตามประเภท (รายรับ/รายจ่าย)
+    // เปลี่ยนหมวดหมู่ตามประเภท
     function updateCategories() {
       const selectedType = typeSelect.value;
       categorySelect.innerHTML = categories[selectedType]
@@ -176,7 +186,7 @@
     typeSelect.addEventListener("change", updateCategories);
     updateCategories();
 
-    // เพิ่มรายการลง Firebase
+    // บันทึกลง Realtime Database
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       const newTransaction = {
@@ -185,11 +195,11 @@
         category: categorySelect.value,
         title: document.getElementById("title").value,
         date: dateInput.value,
-        createdAt: new Date()
+        createdAt: Date.now()
       };
 
       try {
-        await addDoc(transCollection, newTransaction);
+        await push(transRef, newTransaction);
         form.reset();
         dateInput.value = today;
         updateCategories();
@@ -201,18 +211,25 @@
     // ลบรายการ
     window.deleteTransaction = async (id) => {
       if (confirm("ต้องการลบรายการนี้ใช่ไหม?")) {
-        await deleteDoc(doc(db, "transactions", id));
+        await remove(ref(db, `transactions/${id}`));
       }
     };
 
-    // ดึงข้อมูล Realtime จาก Firebase
-    const q = query(transCollection, orderBy("date", "desc"));
-    onSnapshot(q, (snapshot) => {
-      allTransactions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // ดึงข้อมูล Realtime จาก Realtime Database
+    onValue(transRef, (snapshot) => {
+      const data = snapshot.val();
+      allTransactions = [];
+      if (data) {
+        Object.keys(data).forEach(key => {
+          allTransactions.push({ id: key, ...data[key] });
+        });
+      }
+      // เรียงจากวันที่ล่าสุดไปเก่าสุด
+      allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
       renderUI();
     });
 
-    // กรองข้อมูล + คำนวณยอดรวมสรุป
+    // คำนวณสรุปยอด + กรองข้อมูล
     function renderUI() {
       const mode = filterType.value;
       let filtered = allTransactions;
@@ -225,7 +242,6 @@
         filtered = allTransactions.filter(item => item.date.startsWith(filterYear.value));
       }
 
-      // คำนวณสรุปยอดรวม
       let totalInc = 0;
       let totalExp = 0;
 
@@ -236,7 +252,6 @@
 
       const balance = totalInc - totalExp;
 
-      // แสดงผลหน้าสรุป
       document.getElementById("totalIncome").textContent = `฿${totalInc.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
       document.getElementById("totalExpense").textContent = `฿${totalExp.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
       
@@ -244,7 +259,6 @@
       balanceEl.textContent = `฿${balance.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
       balanceEl.className = `text-2xl font-bold mt-2 ${balance >= 0 ? 'text-sky-600' : 'text-rose-600'}`;
 
-      // แสดงรายการในตาราง
       transactionList.innerHTML = filtered.map(item => `
         <tr class="hover:bg-slate-50">
           <td class="p-3 text-slate-500">${item.date}</td>
@@ -265,7 +279,7 @@
       `).join("");
     }
 
-    // สลับซ่อน/แสดงช่องเลือกตัวกรอง
+    // ตัวกรองเวลา
     filterType.addEventListener("change", () => {
       const mode = filterType.value;
       if (mode === "all") {
@@ -282,6 +296,33 @@
     filterDate.addEventListener("change", renderUI);
     filterMonth.addEventListener("change", renderUI);
     filterYear.addEventListener("input", renderUI);
+
+    // Register Service Worker สำหรับ PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js');
+      });
+    }
+
+    // สคริปต์จัดการปุ่มติดตั้ง PWA
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.classList.remove('hidden');
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          installBtn.classList.add('hidden');
+        }
+        deferredPrompt = null;
+      }
+    });
   </script>
 </body>
 </html>
