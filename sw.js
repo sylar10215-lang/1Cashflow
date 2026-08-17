@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mj-cashflow-v1';
+const CACHE_NAME = 'mj-bank-v2';
 const urlsToCache = [
   './',
   './index.html',
