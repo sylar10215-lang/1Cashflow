@@ -8,6 +8,7 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <style>
     body { touch-action: manipulation; }
   </style>
@@ -36,9 +37,12 @@
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-[#232323] border border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
     
     <!-- Header Bar & Profile -->
-    <div class="flex justify-between items-center border-b border-stone-800 pb-4">
+    <div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-800 pb-4">
       <div>
-        <h1 class="text-xl sm:text-2xl font-bold text-amber-400">📊 ตารางงบประมาณรายเดือน</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-xl sm:text-2xl font-bold text-amber-400">📊 ตารางงบประมาณรายเดือน</h1>
+          <span id="saveStatus" class="text-xs px-2 py-0.5 rounded bg-stone-800 text-stone-400">กำลังโหลด...</span>
+        </div>
         <p id="userInfo" class="text-xs text-stone-400">ยินดีต้อนรับ MJ</p>
       </div>
       <div class="flex items-center gap-2">
@@ -109,16 +113,16 @@
           <h3 class="text-xs font-bold text-emerald-400 border-b border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
           <div class="space-y-2">
             <div class="flex justify-between items-center text-xs">
-              <input type="text" value="เงินเดือน" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
-              <input type="number" value="28000" oninput="calculate()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
+              <input type="text" id="extIncName1" value="เงินเดือน" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
+              <input type="number" id="extIncVal1" value="28000" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
             </div>
             <div class="flex justify-between items-center text-xs">
-              <input type="text" value="บัตร Finnix" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
-              <input type="number" value="500" oninput="calculate()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
+              <input type="text" id="extIncName2" value="บัตร Finnix" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
+              <input type="number" id="extIncVal2" value="500" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
             </div>
             <div class="flex justify-between items-center text-xs">
-              <input type="text" value="บัตร Promise" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
-              <input type="number" value="400" oninput="calculate()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
+              <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
+              <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
             </div>
           </div>
         </div>
@@ -128,12 +132,12 @@
           <h3 class="text-xs font-bold text-rose-400 border-b border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
           <div class="space-y-2">
             <div class="flex justify-between items-center text-xs">
-              <input type="text" value="ให้ครอบครัว" class="bg-transparent border-b border-stone-800 text-rose-300 w-3/5 focus:outline-none">
-              <input type="number" value="16000" oninput="calculate()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-400 font-bold focus:outline-none">
+              <input type="text" id="extExpName1" value="ให้ครอบครัว" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-rose-300 w-3/5 focus:outline-none">
+              <input type="number" id="extExpVal1" value="16000" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-400 font-bold focus:outline-none">
             </div>
             <div class="flex justify-between items-center text-xs">
-              <input type="text" value="ค่าเลี้ยงบุตร***" class="bg-transparent border-b border-stone-800 text-rose-300 w-3/5 focus:outline-none">
-              <input type="number" value="800" oninput="calculate()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-400 font-bold focus:outline-none">
+              <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-rose-300 w-3/5 focus:outline-none">
+              <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-400 font-bold focus:outline-none">
             </div>
           </div>
         </div>
@@ -162,7 +166,7 @@
   </div>
 
   <script>
-    // --- 1. FIREBASE CONFIGURATION (ใส่ของ MJ ให้แล้วค่ะ) ---
+    // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
       authDomain: "cashflow-e8505.firebaseapp.com",
@@ -177,31 +181,11 @@
       firebase.initializeApp(firebaseConfig);
     }
     const auth = firebase.auth();
+    const db = firebase.database();
+    let currentUser = null;
+    let saveTimeout = null;
 
-    // --- 2. AUTHENTICATION CONTROLLER ---
-    function loginWithGoogle() {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch((error) => {
-        alert("เกิดข้อผิดพลาดในการล็อกอิน: " + error.message);
-      });
-    }
-
-    function logout() {
-      auth.signOut();
-    }
-
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        document.getElementById('loginScreen').classList.add('hidden');
-        document.getElementById('mainDashboard').classList.remove('hidden');
-        document.getElementById('userInfo').textContent = `ผู้ใช้งาน: ${user.displayName || user.email}`;
-      } else {
-        document.getElementById('loginScreen').classList.remove('hidden');
-        document.getElementById('mainDashboard').classList.add('hidden');
-      }
-    });
-
-    // --- 3. SPREADSHEET LOGIC ---
+    // Default Values
     const defaultIncomes = [
       { name: "เงินเดือน (สุทธิ)", est: 11200, act: 11200 },
       { name: "รายรับอื่นๆ A", est: 1100, act: 1100 },
@@ -219,36 +203,146 @@
       { name: "เงินออม (บัญชีออมสิน)", est: 500, act: 500 }
     ];
 
+    // --- AUTHENTICATION ---
+    function loginWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).catch((error) => alert("ล็อกอินไม่สำเร็จ: " + error.message));
+    }
+
+    function logout() {
+      auth.signOut();
+    }
+
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainDashboard').classList.remove('hidden');
+        document.getElementById('userInfo').textContent = `ผู้ใช้งาน: ${user.displayName || user.email}`;
+        loadUserData();
+      } else {
+        currentUser = null;
+        document.getElementById('loginScreen').classList.remove('hidden');
+        document.getElementById('mainDashboard').classList.add('hidden');
+      }
+    });
+
+    // --- UI HELPERS ---
     function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
       const textColor = type === 'income' ? 'text-emerald-400' : 'text-amber-400';
       return `
         <div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
-          <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." class="col-span-5 bg-transparent border-b border-stone-800 ${textColor} focus:border-amber-400 focus:outline-none px-1">
-          <input type="number" step="0.01" value="${data.est}" oninput="calculate()" class="col-span-2 bg-stone-900 border border-stone-800 rounded text-right px-1 py-1 text-stone-200 focus:outline-none row-est">
-          <input type="number" step="0.01" value="${data.act}" oninput="calculate()" class="col-span-3 bg-stone-900 border border-stone-800 rounded text-right px-1 py-1 text-stone-200 focus:outline-none row-act">
-          <span class="col-span-2 text-right text-stone-400 font-mono row-diff">0</span>
+          <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 bg-transparent border-b border-stone-800 ${textColor} focus:border-amber-400 focus:outline-none px-1">
+          <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-stone-900 border border-stone-800 rounded text-right px-1 py-1 text-stone-200 focus:outline-none">
+          <input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-stone-900 border border-stone-800 rounded text-right px-1 py-1 text-stone-200 focus:outline-none">
+          <span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
         </div>
       `;
-    }
-
-    function init() {
-      const incBox = document.getElementById('incomeRows');
-      const expBox = document.getElementById('expenseRows');
-
-      incBox.innerHTML = defaultIncomes.map(item => createRowHTML('income', item)).join('');
-      expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
-
-      calculate();
     }
 
     function addRow(type) {
       const box = document.getElementById(type === 'income' ? 'incomeRows' : 'expenseRows');
       box.insertAdjacentHTML('beforeend', createRowHTML(type));
-      calculate();
+      onDataChange();
     }
 
+    function onDataChange() {
+      calculate();
+      triggerAutoSave();
+    }
+
+    function updateSaveStatus(text, colorClass) {
+      const statusEl = document.getElementById('saveStatus');
+      statusEl.textContent = text;
+      statusEl.className = `text-xs px-2 py-0.5 rounded ${colorClass}`;
+    }
+
+    // --- SAVE & LOAD FROM FIREBASE REALTIME DATABASE ---
+    function triggerAutoSave() {
+      if (!currentUser) return;
+      updateSaveStatus("กำลังบันทึก...", "bg-amber-900/50 text-amber-400");
+      
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        saveUserData();
+      }, 1000); // ดีเลย์ 1 วินาทีหลังหยุดพิมพ์แล้วเซฟอัตโนมัติ
+    }
+
+    function saveUserData() {
+      if (!currentUser) return;
+
+      const incomes = [];
+      document.querySelectorAll('.income-row').forEach(row => {
+        incomes.push({
+          name: row.querySelector('.row-name').value,
+          est: parseFloat(row.querySelector('.row-est').value) || 0,
+          act: parseFloat(row.querySelector('.row-act').value) || 0
+        });
+      });
+
+      const expenses = [];
+      document.querySelectorAll('.expense-row').forEach(row => {
+        expenses.push({
+          name: row.querySelector('.row-name').value,
+          est: parseFloat(row.querySelector('.row-est').value) || 0,
+          act: parseFloat(row.querySelector('.row-act').value) || 0
+        });
+      });
+
+      const extras = {
+        inc1: { name: document.getElementById('extIncName1').value, val: parseFloat(document.getElementById('extIncVal1').value) || 0 },
+        inc2: { name: document.getElementById('extIncName2').value, val: parseFloat(document.getElementById('extIncVal2').value) || 0 },
+        inc3: { name: document.getElementById('extIncName3').value, val: parseFloat(document.getElementById('extIncVal3').value) || 0 },
+        exp1: { name: document.getElementById('extExpName1').value, val: parseFloat(document.getElementById('extExpVal1').value) || 0 },
+        exp2: { name: document.getElementById('extExpName2').value, val: parseFloat(document.getElementById('extExpVal2').value) || 0 }
+      };
+
+      db.ref('users/' + currentUser.uid).set({
+        incomes,
+        expenses,
+        extras,
+        updatedAt: Date.now()
+      }).then(() => {
+        updateSaveStatus("บันทึกแล้ว ✓", "bg-emerald-900/50 text-emerald-400");
+      }).catch(err => {
+        updateSaveStatus("บันทึกไม่สำเร็จ", "bg-rose-900/50 text-rose-400");
+      });
+    }
+
+    function loadUserData() {
+      if (!currentUser) return;
+      updateSaveStatus("กำลังดึงข้อมูล...", "bg-stone-800 text-stone-400");
+
+      db.ref('users/' + currentUser.uid).once('value').then((snapshot) => {
+        const data = snapshot.val();
+        
+        const incBox = document.getElementById('incomeRows');
+        const expBox = document.getElementById('expenseRows');
+
+        if (data) {
+          incBox.innerHTML = (data.incomes || defaultIncomes).map(item => createRowHTML('income', item)).join('');
+          expBox.innerHTML = (data.expenses || defaultExpenses).map(item => createRowHTML('expense', item)).join('');
+
+          if (data.extras) {
+            if(data.extras.inc1) { document.getElementById('extIncName1').value = data.extras.inc1.name; document.getElementById('extIncVal1').value = data.extras.inc1.val; }
+            if(data.extras.inc2) { document.getElementById('extIncName2').value = data.extras.inc2.name; document.getElementById('extIncVal2').value = data.extras.inc2.val; }
+            if(data.extras.inc3) { document.getElementById('extIncName3').value = data.extras.inc3.name; document.getElementById('extIncVal3').value = data.extras.inc3.val; }
+            if(data.extras.exp1) { document.getElementById('extExpName1').value = data.extras.exp1.name; document.getElementById('extExpVal1').value = data.extras.exp1.val; }
+            if(data.extras.exp2) { document.getElementById('extExpName2').value = data.extras.exp2.name; document.getElementById('extExpVal2').value = data.extras.exp2.val; }
+          }
+        } else {
+          // ถ้ายังไม่มีข้อมูลในระบบ ให้ใช้ค่าเริ่มต้น
+          incBox.innerHTML = defaultIncomes.map(item => createRowHTML('income', item)).join('');
+          expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
+        }
+
+        calculate();
+        updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
+      });
+    }
+
+    // --- CALCULATE LOGIC ---
     function calculate() {
-      // คำนวณฝั่งรายรับ
       let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
       document.querySelectorAll('.income-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
@@ -264,7 +358,6 @@
       document.getElementById('totIncAct').textContent = totIncAct.toLocaleString('th-TH');
       document.getElementById('totIncDiff').textContent = totIncDiff.toLocaleString('th-TH');
 
-      // คำนวณฝั่งรายจ่าย
       let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
       document.querySelectorAll('.expense-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
@@ -280,7 +373,6 @@
       document.getElementById('totExpAct').textContent = totExpAct.toLocaleString('th-TH');
       document.getElementById('totExpDiff').textContent = totExpDiff.toLocaleString('th-TH');
 
-      // สรุปยอดคงเหลือ
       const finalInc = totIncAct;
       const finalExp = totExpAct;
       const finalBal = finalInc - finalExp;
@@ -289,8 +381,6 @@
       document.getElementById('finalTotalExpense').textContent = finalExp.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
       document.getElementById('finalBalance').textContent = finalBal.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
     }
-
-    init();
   </script>
 </body>
 </html>
