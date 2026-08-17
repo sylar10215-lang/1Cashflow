@@ -20,7 +20,7 @@
 </head>
 <body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800">
 
-  <!-- TOP BAR: Theme Toggle & Header -->
+  <!-- TOP BAR -->
   <div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
     <div class="flex items-center gap-2">
       <span class="text-2xl">📊</span>
@@ -31,7 +31,7 @@
     </button>
   </div>
 
-  <!-- 1. หน้าเข้าสู่ระบบ (LOGIN SCREEN) -->
+  <!-- 1. LOGIN SCREEN -->
   <div id="loginScreen" class="max-w-md mx-auto my-16 bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-6">
     <div class="space-y-2">
       <h1 class="text-2xl font-bold text-amber-500">📊 MJ Cashflow System</h1>
@@ -49,7 +49,7 @@
     </button>
   </div>
 
-  <!-- 2. หน้าหลัก (MAIN DASHBOARD SPREADSHEET) -->
+  <!-- 2. MAIN DASHBOARD -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
     
     <!-- Profile Header -->
@@ -67,9 +67,16 @@
 
       <!-- Navigation Tabs -->
       <div class="flex flex-wrap items-center gap-2">
-        <button onclick="switchTab('myTable')" id="tabMyTable" class="bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition">
-          📋 ตารางของฉัน
-        </button>
+        <div class="flex items-center gap-1 bg-stone-100 dark:bg-stone-800 p-1 rounded-xl">
+          <button onclick="switchTab('myTable')" id="tabMyTable" class="bg-amber-500 text-stone-900 text-xs px-3 py-1.5 rounded-lg font-bold transition">
+            📋 ตารางของฉัน
+          </button>
+          <!-- ปุ่มแก้ไขดินสอ -->
+          <button id="toggleEditBtn" onclick="toggleEditMode()" title="สลับโหมดแก้ไข" class="bg-stone-200 dark:bg-stone-700 hover:bg-amber-500 text-stone-700 dark:text-stone-200 hover:text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1">
+            ✏️ <span id="editBtnText" class="text-[11px]">อ่านอย่างเดียว</span>
+          </button>
+        </div>
+
         <button onclick="switchTab('community')" id="tabCommunity" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
           👥 สมาชิกทั้งหมด
         </button>
@@ -82,26 +89,24 @@
       </div>
     </div>
 
-    <!-- VIEW 1: MY TABLE & EDITING -->
+    <!-- VIEW 1: MY TABLE -->
     <div id="viewMyTable" class="space-y-6">
-      <div class="flex justify-between items-center">
-        <h3 class="text-sm font-bold text-amber-500">จัดการตารางงบประมาณส่วนตัว</h3>
-        <div class="flex gap-2">
-          <button onclick="addRow('income')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">+ เพิ่มรับ</button>
-          <button onclick="addRow('expense')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">+ เพิ่มจ่าย</button>
-        </div>
-      </div>
-
+      
       <!-- Main Grid Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-8 space-y-6">
-          <!-- Income -->
+          
+          <!-- Income Section -->
           <div class="space-y-2">
-            <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-2">
-              <span class="col-span-5">รายรับรายเดือน</span>
-              <span class="col-span-2 text-right">ประมาณ</span>
-              <span class="col-span-3 text-right">รับจริง</span>
-              <span class="col-span-2 text-right">ผลต่าง</span>
+            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-2">
+              <div class="text-xs font-bold text-emerald-500 flex items-center gap-2">
+                <span>รายรับรายเดือน</span>
+                <button onclick="addRow('income')" class="edit-only-btn hidden bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded font-bold transition">+ เพิ่มแถว</button>
+              </div>
+              <div class="grid grid-cols-7 gap-2 text-xs font-bold text-emerald-500 text-right w-1/2">
+                <span class="col-span-3">ประมาณ</span>
+                <span class="col-span-4">รับจริง</span>
+              </div>
             </div>
             <div id="incomeRows" class="space-y-2"></div>
             <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2 border-t border-stone-200 dark:border-stone-700">
@@ -112,13 +117,17 @@
             </div>
           </div>
 
-          <!-- Expense -->
+          <!-- Expense Section -->
           <div class="space-y-2 pt-4">
-            <div class="grid grid-cols-12 text-xs font-bold text-amber-500 border-b border-stone-200 dark:border-stone-700 pb-2">
-              <span class="col-span-5">รายจ่ายการทำงาน</span>
-              <span class="col-span-2 text-right">ประมาณ</span>
-              <span class="col-span-3 text-right">จ่ายจริง</span>
-              <span class="col-span-2 text-right">ผลต่าง</span>
+            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-2">
+              <div class="text-xs font-bold text-amber-500 flex items-center gap-2">
+                <span>รายจ่ายการทำงาน</span>
+                <button onclick="addRow('expense')" class="edit-only-btn hidden bg-rose-600 hover:bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded font-bold transition">+ เพิ่มแถว</button>
+              </div>
+              <div class="grid grid-cols-7 gap-2 text-xs font-bold text-amber-500 text-right w-1/2">
+                <span class="col-span-3">ประมาณ</span>
+                <span class="col-span-4">จ่ายจริง</span>
+              </div>
             </div>
             <div id="expenseRows" class="space-y-2"></div>
             <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2 border-t border-stone-200 dark:border-stone-700">
@@ -128,51 +137,38 @@
               <span id="totExpDiff" class="col-span-2 text-right">0</span>
             </div>
           </div>
+
         </div>
 
-        <!-- Extra Table (ฝั่งขวา) -->
+        <!-- Extra Tables (ฝั่งขวา) -->
         <div class="lg:col-span-4 space-y-6 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+          
           <!-- รายรับเสริม -->
           <div class="space-y-2">
-            <h3 class="text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between items-center">
-                <input type="text" id="extIncName1" value="เงินเดือน" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extIncVal1" value="28000" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
-              </div>
-              <div class="flex justify-between items-center">
-                <input type="text" id="extIncName2" value="บัตร Finnix" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extIncVal2" value="500" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
-              </div>
-              <div class="flex justify-between items-center">
-                <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
-              </div>
-              <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
-                <span class="text-emerald-500">รวมรายรับเสริม:</span>
-                <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
-              </div>
+            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-1">
+              <h3 class="text-xs font-bold text-emerald-500">รายรับ/ต่อเดือน</h3>
+              <button onclick="addExtraRow('extIncome')" class="edit-only-btn hidden bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
+            </div>
+            <div id="extIncomeContainer" class="space-y-2 text-xs"></div>
+            <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
+              <span class="text-emerald-500">รวมรายรับเสริม:</span>
+              <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
             </div>
           </div>
 
-          <!-- รายจ่ายฝั่งไทย -->
+          <!-- รายจ่ายไทย -->
           <div class="space-y-2 pt-4 border-t border-stone-200 dark:border-stone-800">
-            <h3 class="text-xs font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
-            <div class="space-y-2 text-xs">
-              <div class="flex justify-between items-center">
-                <input type="text" id="extExpName1" value="ให้ครอบครัว" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extExpVal1" value="16000" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
-              </div>
-              <div class="flex justify-between items-center">
-                <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
-                <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
-              </div>
-              <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
-                <span class="text-rose-500">รวมรายจ่ายไทย:</span>
-                <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
-              </div>
+            <div class="flex justify-between items-center border-b border-stone-200 dark:border-stone-700 pb-1">
+              <h3 class="text-xs font-bold text-rose-500">รายจ่ายฝั่งไทย</h3>
+              <button onclick="addExtraRow('extExpense')" class="edit-only-btn hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
+            </div>
+            <div id="extExpenseContainer" class="space-y-2 text-xs"></div>
+            <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
+              <span class="text-rose-500">รวมรายจ่ายไทย:</span>
+              <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
             </div>
           </div>
+
         </div>
       </div>
 
@@ -195,7 +191,7 @@
       </div>
     </div>
 
-    <!-- VIEW 2: COMMUNITY & MEMBERS LIST -->
+    <!-- VIEW 2: COMMUNITY -->
     <div id="viewCommunity" class="hidden space-y-4">
       <h3 class="text-sm font-bold text-amber-500">👥 สมาชิกทั้งหมดในระบบ (คลิกที่ชื่อเพื่อส่องตารางการเงิน)</h3>
       <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
@@ -203,14 +199,11 @@
 
   </div>
 
-  <!-- 3. POPUP MODAL: ส่องตารางเพื่อน (READ-ONLY 100%) -->
+  <!-- POPUP: FRIEND TABLE (READ-ONLY) -->
   <div id="friendTableModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 z-50 overflow-y-auto">
     <div class="bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 max-w-5xl w-full my-auto space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
-      
-      <!-- Close Button -->
       <button onclick="closeFriendModal()" class="absolute top-4 right-4 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 p-2 rounded-full font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
 
-      <!-- Friend Profile Header -->
       <div class="flex items-center gap-3 border-b border-stone-200 dark:border-stone-800 pb-4">
         <img id="friendAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Friend Profile">
         <div>
@@ -222,10 +215,7 @@
         </div>
       </div>
 
-      <!-- Friend Table Content (Text Only) -->
-      <div id="friendTableContent" class="space-y-6">
-        <!-- Content Will be Injected Here -->
-      </div>
+      <div id="friendTableContent" class="space-y-6"></div>
     </div>
   </div>
 
@@ -268,8 +258,9 @@
     
     let currentUser = null;
     let saveTimeout = null;
+    let isEditMode = false; // ค่าเริ่มต้น: อ่านอย่างเดียว
 
-    // Default Values
+    // Default Data
     const defaultIncomes = [
       { name: "เงินเดือน (สุทธิ)", est: 11200, act: 11200 },
       { name: "รายรับอื่นๆ A", est: 1100, act: 1100 },
@@ -282,6 +273,17 @@
       { name: "ค่าเดินทาง (หาร 2 คน)", est: 1000, act: 1000 },
       { name: "ค่าของใช้ (ต่อเดือน)", est: 500, act: 500 },
       { name: "เงินออม (บัญชีออมสิน)", est: 500, act: 500 }
+    ];
+
+    const defaultExtIncomes = [
+      { name: "เงินเดือน", val: 28000 },
+      { name: "บัตร Finnix", val: 500 },
+      { name: "บัตร Promise", val: 400 }
+    ];
+
+    const defaultExtExpenses = [
+      { name: "ให้ครอบครัว", val: 16000 },
+      { name: "ค่าเลี้ยงบุตร***", val: 800 }
     ];
 
     // --- THEME TOGGLE ---
@@ -321,6 +323,38 @@
       }
     });
 
+    // --- EDIT MODE TOGGLE ---
+    function toggleEditMode() {
+      isEditMode = !isEditMode;
+      applyEditState();
+    }
+
+    function applyEditState() {
+      const editBtn = document.getElementById('toggleEditBtn');
+      const editBtnText = document.getElementById('editBtnText');
+
+      if (isEditMode) {
+        editBtn.className = "bg-amber-500 text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1 shadow-lg animate-pulse";
+        editBtnText.textContent = "กำลังแก้ไข...";
+        document.querySelectorAll('.edit-only-btn').forEach(btn => btn.classList.remove('hidden'));
+      } else {
+        editBtn.className = "bg-stone-200 dark:bg-stone-700 hover:bg-amber-500 text-stone-700 dark:text-stone-200 hover:text-stone-900 text-xs p-1.5 rounded-lg transition font-bold flex items-center gap-1";
+        editBtnText.textContent = "อ่านอย่างเดียว";
+        document.querySelectorAll('.edit-only-btn').forEach(btn => btn.classList.add('hidden'));
+      }
+
+      // ปรับการ disabled ของ input ทุกช่อง
+      document.querySelectorAll('#viewMyTable input').forEach(input => {
+        input.disabled = !isEditMode;
+        input.readOnly = !isEditMode;
+        if (!isEditMode) {
+          input.classList.add('cursor-not-allowed', 'opacity-70');
+        } else {
+          input.classList.remove('cursor-not-allowed', 'opacity-70');
+        }
+      });
+    }
+
     // --- PROFILE MANAGEMENT ---
     function loadUserProfile(uid) {
       db.ref('users/' + uid + '/profile').once('value').then((snap) => {
@@ -352,7 +386,7 @@
       });
     }
 
-    // --- NAVIGATION & TABS ---
+    // --- TABS & NAVIGATION ---
     function switchTab(tab) {
       const btnMy = document.getElementById('tabMyTable');
       const btnCom = document.getElementById('tabCommunity');
@@ -360,20 +394,20 @@
       const viewCom = document.getElementById('viewCommunity');
 
       if (tab === 'myTable') {
-        btnMy.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
+        btnMy.className = "bg-amber-500 text-stone-900 text-xs px-3 py-1.5 rounded-lg font-bold transition";
         btnCom.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
         viewMy.classList.remove('hidden');
         viewCom.classList.add('hidden');
       } else {
         btnCom.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
-        btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
+        btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-1.5 rounded-lg font-bold transition";
         viewCom.classList.remove('hidden');
         viewMy.classList.add('hidden');
         loadCommunityMembers();
       }
     }
 
-    // --- COMMUNITY & INSPECT OTHER USERS IN POPUP ---
+    // --- COMMUNITY & POPUP MODAL ---
     function loadCommunityMembers() {
       const memberListEl = document.getElementById('memberList');
       memberListEl.innerHTML = '<p class="text-xs text-stone-400">กำลังโหลดรายชื่อสมาชิก...</p>';
@@ -424,15 +458,13 @@
       });
     }
 
-    function closeFriendModal() {
-      document.getElementById('friendTableModal').classList.add('hidden');
-    }
+    function closeFriendModal() { document.getElementById('friendTableModal').classList.add('hidden'); }
 
-    // แสดงผลตารางเพื่อนเป็น Text ล้วนๆ (แก้ไม่ได้ 100%)
     function renderFriendTableText(data) {
       const incList = data.incomes || defaultIncomes;
       const expList = data.expenses || defaultExpenses;
-      const ext = data.extras || {};
+      const extIncList = data.extIncomes || defaultExtIncomes;
+      const extExpList = data.extExpenses || defaultExtExpenses;
 
       let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
       let incHtml = incList.map(item => {
@@ -460,11 +492,17 @@
           </div>`;
       }).join('');
 
-      const extInc1 = ext.inc1?.val || 0; const extInc2 = ext.inc2?.val || 0; const extInc3 = ext.inc3?.val || 0;
-      const totalExtInc = extInc1 + extInc2 + extInc3;
+      let totalExtInc = 0;
+      let extIncHtml = extIncList.map(item => {
+        const val = item.val || 0; totalExtInc += val;
+        return `<div class="flex justify-between py-1"><span>${item.name || '-'}</span><span class="font-bold text-emerald-500">${val.toLocaleString('th-TH')}</span></div>`;
+      }).join('');
 
-      const extExp1 = ext.exp1?.val || 0; const extExp2 = ext.exp2?.val || 0;
-      const totalExtExp = extExp1 + extExp2;
+      let totalExtExp = 0;
+      let extExpHtml = extExpList.map(item => {
+        const val = item.val || 0; totalExtExp += val;
+        return `<div class="flex justify-between py-1"><span>${item.name || '-'}</span><span class="font-bold text-rose-500">${val.toLocaleString('th-TH')}</span></div>`;
+      }).join('');
 
       const grandTotalIncome = totIncAct + totalExtInc;
       const grandTotalExpense = totExpAct + totalExtExp;
@@ -473,7 +511,6 @@
       const html = `
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-8 space-y-6">
-            <!-- Income -->
             <div class="space-y-1">
               <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-2">
                 <span class="col-span-5">รายรับรายเดือน</span>
@@ -490,7 +527,6 @@
               </div>
             </div>
 
-            <!-- Expense -->
             <div class="space-y-1 pt-4">
               <div class="grid grid-cols-12 text-xs font-bold text-amber-500 border-b border-stone-200 dark:border-stone-700 pb-2">
                 <span class="col-span-5">รายจ่ายการทำงาน</span>
@@ -508,26 +544,21 @@
             </div>
           </div>
 
-          <!-- Extra Right -->
           <div class="lg:col-span-4 space-y-4 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
             <div class="space-y-2 text-xs">
               <h3 class="font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
-              <div class="flex justify-between py-1"><span>${ext.inc1?.name || 'เงินเดือน'}</span><span class="font-bold text-emerald-500">${extInc1.toLocaleString('th-TH')}</span></div>
-              <div class="flex justify-between py-1"><span>${ext.inc2?.name || 'บัตร Finnix'}</span><span class="font-bold text-emerald-500">${extInc2.toLocaleString('th-TH')}</span></div>
-              <div class="flex justify-between py-1"><span>${ext.inc3?.name || 'บัตร Promise'}</span><span class="font-bold text-emerald-500">${extInc3.toLocaleString('th-TH')}</span></div>
+              ${extIncHtml}
               <div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-emerald-500">รวมรายรับเสริม:</span><span class="text-emerald-500">${totalExtInc.toLocaleString('th-TH')}</span></div>
             </div>
 
             <div class="space-y-2 text-xs pt-2 border-t border-stone-200 dark:border-stone-800">
               <h3 class="font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
-              <div class="flex justify-between py-1"><span>${ext.exp1?.name || 'ให้ครอบครัว'}</span><span class="font-bold text-rose-500">${extExp1.toLocaleString('th-TH')}</span></div>
-              <div class="flex justify-between py-1"><span>${ext.exp2?.name || 'ค่าเลี้ยงบุตร***'}</span><span class="font-bold text-rose-500">${extExp2.toLocaleString('th-TH')}</span></div>
+              ${extExpHtml}
               <div class="flex justify-between pt-2 border-t font-bold border-stone-200 dark:border-stone-700"><span class="text-rose-500">รวมรายจ่ายไทย:</span><span class="text-rose-500">${totalExtExp.toLocaleString('th-TH')}</span></div>
             </div>
           </div>
         </div>
 
-        <!-- Summary -->
         <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
           <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
             <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-emerald-500">${grandTotalIncome.toLocaleString('th-TH')}</p></div>
@@ -540,12 +571,15 @@
       document.getElementById('friendTableContent').innerHTML = html;
     }
 
-    // --- SPREADSHEET RENDER & CALCULATIONS FOR MY TABLE ---
+    // --- SPREADSHEET RENDER & EDITING LOGIC ---
     function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
       const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
       return `
         <div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
-          <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
+          <div class="col-span-5 flex items-center gap-1">
+            <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
+            <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name w-full bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
+          </div>
           <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
           <input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
           <span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
@@ -553,10 +587,37 @@
       `;
     }
 
+    function createExtraRowHTML(type, data = { name: '', val: 0 }) {
+      const textColor = type === 'extIncome' ? 'text-emerald-500' : 'text-rose-500';
+      return `
+        <div class="flex justify-between items-center gap-1 ${type}-row">
+          <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
+          <input type="text" value="${data.name}" oninput="onDataChange()" placeholder="ชื่อรายการ..." class="row-name bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+          <input type="number" value="${data.val}" oninput="onDataChange()" class="row-val bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 ${textColor} font-bold focus:outline-none">
+        </div>
+      `;
+    }
+
     function addRow(type) {
       const box = document.getElementById(type === 'income' ? 'incomeRows' : 'expenseRows');
       box.insertAdjacentHTML('beforeend', createRowHTML(type));
+      applyEditState();
       onDataChange();
+    }
+
+    function addExtraRow(type) {
+      const box = document.getElementById(type === 'extIncome' ? 'extIncomeContainer' : 'extExpenseContainer');
+      box.insertAdjacentHTML('beforeend', createExtraRowHTML(type));
+      applyEditState();
+      onDataChange();
+    }
+
+    function removeRow(btnElement) {
+      const row = btnElement.closest('.income-row, .expense-row, .extIncome-row, .extExpense-row');
+      if (row) {
+        row.remove();
+        onDataChange();
+      }
     }
 
     function onDataChange() {
@@ -592,16 +653,24 @@
         });
       });
 
-      const extras = {
-        inc1: { name: document.getElementById('extIncName1').value, val: parseFloat(document.getElementById('extIncVal1').value) || 0 },
-        inc2: { name: document.getElementById('extIncName2').value, val: parseFloat(document.getElementById('extIncVal2').value) || 0 },
-        inc3: { name: document.getElementById('extIncName3').value, val: parseFloat(document.getElementById('extIncVal3').value) || 0 },
-        exp1: { name: document.getElementById('extExpName1').value, val: parseFloat(document.getElementById('extExpVal1').value) || 0 },
-        exp2: { name: document.getElementById('extExpName2').value, val: parseFloat(document.getElementById('extExpVal2').value) || 0 }
-      };
+      const extIncomes = [];
+      document.querySelectorAll('.extIncome-row').forEach(row => {
+        extIncomes.push({
+          name: row.querySelector('.row-name').value,
+          val: parseFloat(row.querySelector('.row-val').value) || 0
+        });
+      });
+
+      const extExpenses = [];
+      document.querySelectorAll('.extExpense-row').forEach(row => {
+        extExpenses.push({
+          name: row.querySelector('.row-name').value,
+          val: parseFloat(row.querySelector('.row-val').value) || 0
+        });
+      });
 
       db.ref('users/' + currentUser.uid + '/data').set({
-        incomes, expenses, extras, updatedAt: Date.now()
+        incomes, expenses, extIncomes, extExpenses, updatedAt: Date.now()
       }).then(() => {
         updateSaveStatus("บันทึกแล้ว ✓", "bg-emerald-900/50 text-emerald-400");
       }).catch(() => {
@@ -616,23 +685,22 @@
         const data = snapshot.val();
         const incBox = document.getElementById('incomeRows');
         const expBox = document.getElementById('expenseRows');
+        const extIncBox = document.getElementById('extIncomeContainer');
+        const extExpBox = document.getElementById('extExpenseContainer');
 
         if (data) {
           incBox.innerHTML = (data.incomes || defaultIncomes).map(item => createRowHTML('income', item)).join('');
           expBox.innerHTML = (data.expenses || defaultExpenses).map(item => createRowHTML('expense', item)).join('');
-
-          if (data.extras) {
-            if(data.extras.inc1) { document.getElementById('extIncName1').value = data.extras.inc1.name; document.getElementById('extIncVal1').value = data.extras.inc1.val; }
-            if(data.extras.inc2) { document.getElementById('extIncName2').value = data.extras.inc2.name; document.getElementById('extIncVal2').value = data.extras.inc2.val; }
-            if(data.extras.inc3) { document.getElementById('extIncName3').value = data.extras.inc3.name; document.getElementById('extIncVal3').value = data.extras.inc3.val; }
-            if(data.extras.exp1) { document.getElementById('extExpName1').value = data.extras.exp1.name; document.getElementById('extExpVal1').value = data.extras.exp1.val; }
-            if(data.extras.exp2) { document.getElementById('extExpName2').value = data.extras.exp2.name; document.getElementById('extExpVal2').value = data.extras.exp2.val; }
-          }
+          extIncBox.innerHTML = (data.extIncomes || defaultExtIncomes).map(item => createExtraRowHTML('extIncome', item)).join('');
+          extExpBox.innerHTML = (data.extExpenses || defaultExtExpenses).map(item => createExtraRowHTML('extExpense', item)).join('');
         } else {
           incBox.innerHTML = defaultIncomes.map(item => createRowHTML('income', item)).join('');
           expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
+          extIncBox.innerHTML = defaultExtIncomes.map(item => createExtraRowHTML('extIncome', item)).join('');
+          extExpBox.innerHTML = defaultExtExpenses.map(item => createExtraRowHTML('extExpense', item)).join('');
         }
 
+        applyEditState();
         calculate();
         updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
       });
@@ -672,14 +740,15 @@
       document.getElementById('totExpAct').textContent = totExpAct.toLocaleString('th-TH');
       document.getElementById('totExpDiff').textContent = totExpDiff.toLocaleString('th-TH');
 
-      const extInc1 = parseFloat(document.getElementById('extIncVal1').value) || 0;
-      const extInc2 = parseFloat(document.getElementById('extIncVal2').value) || 0;
-      const extInc3 = parseFloat(document.getElementById('extIncVal3').value) || 0;
-      const totalExtInc = extInc1 + extInc2 + extInc3;
+      let totalExtInc = 0;
+      document.querySelectorAll('.extIncome-row').forEach(row => {
+        totalExtInc += parseFloat(row.querySelector('.row-val').value) || 0;
+      });
 
-      const extExp1 = parseFloat(document.getElementById('extExpVal1').value) || 0;
-      const extExp2 = parseFloat(document.getElementById('extExpVal2').value) || 0;
-      const totalExtExp = extExp1 + extExp2;
+      let totalExtExp = 0;
+      document.querySelectorAll('.extExpense-row').forEach(row => {
+        totalExtExp += parseFloat(row.querySelector('.row-val').value) || 0;
+      });
 
       document.getElementById('subTotalExtInc').textContent = totalExtInc.toLocaleString('th-TH');
       document.getElementById('subTotalExtExp').textContent = totalExtExp.toLocaleString('th-TH');
