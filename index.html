@@ -2,25 +2,13 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <!-- ล็อคไม่ให้ซูมหน้าจอ ให้ฟีลลิ่งเหมือนแอปจริง 100% -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MJ Financial System & Mobile App</title>
-
-  <!-- PWA Settings -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0f172a">
-  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2382/2382461.png">
-
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    /* ป้องกันการเลือกข้อความและการซูมบนมือถือ */
-    body {
-      touch-action: manipulation;
-      -webkit-user-select: none;
-      user-select: none;
-    }
-    /* ซ่อน Scrollbar เพื่อความสวยงาม */
+    body { touch-action: manipulation; -webkit-user-select: none; user-select: none; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
@@ -28,347 +16,211 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased overflow-x-hidden">
 
   <!-- ================================================================= -->
-  <!-- 🖥️ DISPLAY 1: DESKTOP WEB APPLICATION (หน้าเว็บ หจก. / ธนาคารคอม) -->
+  <!-- 🔒 LOGIN & 2FA OVERLAY (หน้าเข้าสู่ระบบ & ยืนยัน 2 ขั้นตอน) -->
   <!-- ================================================================= -->
-  <div class="hidden md:flex min-h-screen w-full bg-slate-900">
-    
-    <!-- Sidebar เมนูด้านข้าง -->
-    <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between p-6">
-      <div class="space-y-8">
-        <!-- Company / App Logo -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg text-lg">
-            MJ
-          </div>
-          <div>
-            <h1 class="font-bold text-white text-sm tracking-wide">หจก. เอ็มเจ ไฟแนนซ์</h1>
-            <p class="text-[11px] text-slate-400">ระบบจัดการการเงินองค์กร</p>
-          </div>
+  <div id="authModal" class="fixed inset-0 bg-slate-950/95 backdrop-blur-xl z-[100] flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-sm w-full space-y-5 text-center shadow-2xl">
+      
+      <!-- Step 1: Login with Google -->
+      <div id="stepGoogleLogin" class="space-y-4">
+        <div class="w-16 h-16 bg-gradient-to-tr from-sky-500 to-blue-600 rounded-2xl flex items-center justify-center font-bold text-2xl mx-auto shadow-lg shadow-sky-500/30">
+          MJ
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-white">เข้าสู่ระบบการเงิน</h2>
+          <p class="text-xs text-slate-400 mt-1">กรุณายืนยันตัวตนด้วย Gmail เพื่อเข้าใช้งาน</p>
+        </div>
+        <button id="btnGoogleAuth" class="w-full bg-white hover:bg-slate-100 text-slate-900 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 transition shadow-md text-sm">
+          <svg class="w-5 h-5" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.7 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.7-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z"/><path fill="#FBBC05" d="M5.6 14.8c-.2-.7-.4-1.5-.4-2.3s.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 10.8 0 12s.7 2.3 1.9 4.7l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16c1.8 3.7 5.6 7 10.1 7z"/></svg>
+          เข้าสู่ระบบด้วย Google
+        </button>
+      </div>
+
+      <!-- Step 2: 2FA Phone Verification -->
+      <div id="step2FA" class="hidden space-y-4">
+        <div class="w-12 h-12 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full flex items-center justify-center text-xl mx-auto">
+          🛡️
+        </div>
+        <div>
+          <h2 class="text-lg font-bold text-white">ยืนยันตัวตน 2 ขั้นตอน (2FA)</h2>
+          <p class="text-xs text-slate-400 mt-1">ระบบส่งรหัส OTP ไปยังเบอร์โทรศัพท์ของคุณ</p>
         </div>
 
-        <!-- Desktop Navigation -->
+        <div id="sendOtpBox" class="space-y-3">
+          <input type="tel" id="phoneNumberInput" placeholder="+66812345678" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-xs text-center font-bold text-white outline-none focus:border-sky-500">
+          <button id="btnSendOtp" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 rounded-xl text-xs transition">
+            ส่งรหัส OTP
+          </button>
+        </div>
+
+        <div id="verifyOtpBox" class="hidden space-y-3">
+          <input type="text" id="otpCodeInput" placeholder="กรอกรหัส 6 หลัก" maxlength="6" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-center font-bold tracking-widest text-sky-400 outline-none">
+          <button id="btnVerifyOtp" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2.5 rounded-xl text-xs transition">
+            ยืนยันรหัส OTP
+          </button>
+        </div>
+        <div id="recaptcha-container"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ================================================================= -->
+  <!-- 🖥️ DISPLAY 1: DESKTOP WEB APPLICATION -->
+  <!-- ================================================================= -->
+  <div class="hidden md:flex min-h-screen w-full bg-slate-900">
+    <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between p-6">
+      <div class="space-y-8">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center font-bold text-white shadow-lg text-lg">MJ</div>
+          <div>
+            <h1 class="font-bold text-white text-sm">หจก. เอ็มเจ ไฟแนนซ์</h1>
+            <p class="text-[11px] text-slate-400">ระบบจัดการการเงิน</p>
+          </div>
+        </div>
         <nav class="space-y-1 text-sm font-medium">
-          <button onclick="dtSwitchTab('dashboard')" id="dtNavDashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
-            <span>📊</span> <span>ภาพรวมระบบ (Dashboard)</span>
-          </button>
-          <button onclick="dtSwitchTab('add')" id="dtNavAdd" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-            <span>➕</span> <span>ลงบันทึกรายการ</span>
-          </button>
-          <button onclick="dtSwitchTab('history')" id="dtNavHistory" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition">
-            <span>📜</span> <span>ประวัติธุรกรรม</span>
-          </button>
+          <button onclick="dtSwitchTab('dashboard')" id="dtNavDashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 font-semibold">📊 ภาพรวมระบบ</button>
+          <button onclick="dtSwitchTab('add')" id="dtNavAdd" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 transition">➕ บันทึกรายการ</button>
+          <button onclick="dtSwitchTab('profile')" id="dtNavProfile" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 transition">⚙️ ตั้งค่าโปรไฟล์</button>
         </nav>
       </div>
-
-      <!-- User Profile Selector (Desktop) -->
-      <div class="pt-6 border-t border-slate-800">
-        <label class="text-xs text-slate-400 block mb-2">สลับโปรไฟล์ผู้ใช้งาน:</label>
-        <select class="userSelectControl w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-sky-400 font-semibold focus:outline-none">
-          <option value="MJ">MJ (ผู้ใช้หลัก)</option>
-          <option value="FriendA">เพื่อน A</option>
-          <option value="FriendB">เพื่อน B</option>
-        </select>
-      </div>
+      <button onclick="logout()" class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 py-2.5 rounded-xl text-xs font-bold transition">ออกจากระบบ</button>
     </aside>
 
-    <!-- Desktop Main Content Area -->
     <main class="flex-1 p-8 space-y-6 overflow-y-auto max-h-screen">
-      
-      <!-- Top Bar -->
       <header class="flex justify-between items-center bg-slate-950/50 p-4 rounded-2xl border border-slate-800 backdrop-blur-md">
         <div>
           <h2 class="text-xl font-bold text-white">ระบบบัญชีรายรับ-รายจ่าย</h2>
-          <p class="text-xs text-slate-400">สถานะการเชื่อมต่อ: <span class="text-emerald-400">● Firebase Realtime Online</span></p>
+          <p class="text-xs text-slate-400">สถานะ: <span class="text-emerald-400">● ล็อคอินด้วย Gmail แล้ว</span></p>
         </div>
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <div class="text-right">
-            <p class="text-xs text-slate-400">ผู้ใช้งานปัจจุบัน</p>
-            <p class="text-sm font-bold text-sky-400 activeUserText">MJ</p>
+            <p class="text-xs font-bold text-white userDisplayName">กำลังโหลด...</p>
+            <p class="text-[10px] text-slate-400 userEmailText">-</p>
           </div>
-          <div class="w-10 h-10 rounded-full bg-sky-500/20 border border-sky-400 flex items-center justify-center font-bold text-sky-400 activeUserAvatar">
-            M
-          </div>
+          <img class="w-10 h-10 rounded-full border border-sky-400 userAvatarImg" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
         </div>
       </header>
 
-      <!-- Desktop View Pages -->
+      <!-- Dashboard -->
       <div id="dtPageDashboard" class="space-y-6">
-        <!-- Overview Cards -->
         <div class="grid grid-cols-3 gap-6">
           <div class="bg-gradient-to-br from-sky-900/40 to-slate-900 p-6 rounded-2xl border border-sky-500/20 shadow-xl">
-            <p class="text-xs font-medium text-sky-400">ยอดเงินคงเหลือรวม</p>
+            <p class="text-xs text-sky-400">ยอดเงินคงเหลือรวม</p>
             <h3 class="text-3xl font-extrabold text-white mt-2 totalBalanceText">฿0.00</h3>
           </div>
-          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-xl border-l-4 border-l-emerald-500">
-            <p class="text-xs font-medium text-slate-400">รายรับรวม</p>
+          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 border-l-4 border-l-emerald-500">
+            <p class="text-xs text-slate-400">รายรับรวม</p>
             <h3 class="text-2xl font-bold text-emerald-400 mt-2 totalIncomeText">฿0.00</h3>
           </div>
-          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 shadow-xl border-l-4 border-l-rose-500">
-            <p class="text-xs font-medium text-slate-400">รายจ่ายรวม</p>
+          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 border-l-4 border-l-rose-500">
+            <p class="text-xs text-slate-400">รายจ่ายรวม</p>
             <h3 class="text-2xl font-bold text-rose-400 mt-2 totalExpenseText">฿0.00</h3>
           </div>
         </div>
-
-        <!-- Filter & Table -->
-        <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
-          <div class="flex justify-between items-center">
-            <h3 class="font-bold text-white text-base">รายการธุรกรรมล่าสุด</h3>
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400">ตัวกรอง:</span>
-              <select class="filterTypeControl bg-slate-900 text-xs border border-slate-700 rounded-lg p-2 text-slate-200">
-                <option value="all">ทั้งหมด</option>
-                <option value="daily">รายวัน</option>
-                <option value="monthly">รายเดือน</option>
-                <option value="yearly">รายปี</option>
-              </select>
-            </div>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm text-slate-300">
-              <thead class="bg-slate-900 text-slate-400 text-xs uppercase border-b border-slate-800">
-                <tr>
-                  <th class="p-3">วันที่</th>
-                  <th class="p-3">ประเภท</th>
-                  <th class="p-3">หมวดหมู่</th>
-                  <th class="p-3">รายละเอียด</th>
-                  <th class="p-3 text-right">จำนวนเงิน</th>
-                  <th class="p-3 text-center">จัดการ</th>
-                </tr>
-              </thead>
-              <tbody class="dtTableBody divide-y divide-slate-800/60">
-                <!-- Loaded items -->
-              </tbody>
-            </table>
-          </div>
+        <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800">
+          <h3 class="font-bold text-white text-base mb-4">รายการล่าสุด</h3>
+          <div class="dtTableContainer space-y-2"></div>
         </div>
       </div>
 
-      <!-- Desktop View: Add Transaction Form -->
-      <div id="dtPageAdd" class="hidden bg-slate-950 p-8 rounded-2xl border border-slate-800 max-w-2xl mx-auto space-y-6">
-        <h3 class="text-lg font-bold text-sky-400 border-b border-slate-800 pb-3">➕ บันทึกธุรกรรมการเงิน</h3>
-        <form class="dtTransForm space-y-4">
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs text-slate-400">ประเภทรายการ</label>
-              <select class="transTypeInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm mt-1 focus:border-sky-500 outline-none">
-                <option value="expense">🔻 รายจ่าย</option>
-                <option value="income">🟢 รายรับ</option>
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-slate-400">จำนวนเงิน (บาท)</label>
-              <input type="number" step="0.01" required placeholder="0.00" class="transAmountInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm mt-1 focus:border-sky-500 outline-none text-sky-400 font-bold">
-            </div>
-          </div>
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="text-xs text-slate-400">หมวดหมู่</label>
-              <select class="transCategoryInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm mt-1 focus:border-sky-500 outline-none">
-              </select>
-            </div>
-            <div>
-              <label class="text-xs text-slate-400">วันที่ทำรายการ</label>
-              <input type="date" required class="transDateInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm mt-1 focus:border-sky-500 outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="text-xs text-slate-400">รายละเอียดเพิ่มเติม</label>
-            <input type="text" required placeholder="เช่น ค่าวัตถุดิบ, ค่าบริการ" class="transTitleInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm mt-1 focus:border-sky-500 outline-none">
-          </div>
-          
-          <div class="p-4 bg-slate-900/80 border border-sky-500/30 rounded-xl space-y-2">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" class="linkFriendCheck rounded accent-sky-500">
-              <span class="text-xs font-semibold text-sky-300">🔗 ลิงก์รายการนี้กับบัญชีเพื่อน</span>
-            </label>
-            <div class="linkFriendBox hidden pt-2 border-t border-slate-800">
-              <select class="targetFriendSelect w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200"></select>
-            </div>
-          </div>
-
-          <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-sky-500/20 transition">
-            บันทึกเข้าสู่ระบบ
-          </button>
+      <!-- Add -->
+      <div id="dtPageAdd" class="hidden bg-slate-950 p-8 rounded-2xl border border-slate-800 max-w-xl mx-auto space-y-4">
+        <h3 class="text-lg font-bold text-sky-400">➕ บันทึกธุรกรรม</h3>
+        <form class="transForm space-y-3">
+          <select class="transTypeInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs"><option value="expense">🔻 รายจ่าย</option><option value="income">🟢 รายรับ</option></select>
+          <input type="number" step="0.01" required placeholder="จำนวนเงิน" class="transAmountInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-sm text-sky-400 font-bold">
+          <select class="transCategoryInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs"></select>
+          <input type="text" required placeholder="รายละเอียด" class="transTitleInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs">
+          <input type="date" required class="transDateInput w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs">
+          <button type="submit" class="w-full bg-sky-500 text-white font-bold py-3 rounded-xl text-xs">บันทึก</button>
         </form>
       </div>
 
-      <!-- Desktop View: Full History -->
-      <div id="dtPageHistory" class="hidden bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
-        <h3 class="font-bold text-white text-base">ประวัติธุรกรรมทั้งหมด</h3>
-        <div class="dtHistoryContainer space-y-2"></div>
-      </div>
-
-    </main>
-  </div>
-
-
-  <!-- ================================================================= -->
-  <!-- 📱 DISPLAY 2: MOBILE NATIVE APP (แอปมือถือ iOS / Android) -->
-  <!-- ================================================================= -->
-  <div class="md:hidden min-h-screen w-full bg-slate-900 flex flex-col justify-between relative overflow-hidden select-none">
-
-    <!-- Mobile App Header Bar -->
-    <header class="bg-slate-950 border-b border-slate-800/80 p-4 flex justify-between items-center z-10 sticky top-0">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center font-bold text-sm text-white shadow-md activeUserAvatar">
-          M
-        </div>
-        <div>
-          <p class="text-[10px] text-slate-400">ผู้ใช้งาน</p>
-          <select class="userSelectControl bg-transparent font-bold text-sky-400 text-xs focus:outline-none cursor-pointer">
-            <option value="MJ" class="bg-slate-900 text-white">MJ (ผู้ใช้หลัก)</option>
-            <option value="FriendA" class="bg-slate-900 text-white">เพื่อน A</option>
-            <option value="FriendB" class="bg-slate-900 text-white">เพื่อน B</option>
-          </select>
-        </div>
-      </div>
-      <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-medium">
-        ● Online
-      </span>
-    </header>
-
-    <!-- Mobile Scrollable Content Area -->
-    <main class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 mb-16">
-
-      <!-- ================= MOBILE PAGE 1: DASHBOARD ================= -->
-      <section id="mbPageDashboard" class="space-y-4">
-        <!-- Native Mobile Bank Card -->
-        <div class="bg-gradient-to-br from-sky-600 via-sky-500 to-blue-700 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
-          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-          <p class="text-[11px] text-sky-100 font-medium">ยอดเงินคงเหลือ</p>
-          <h2 class="text-3xl font-extrabold mt-1 tracking-tight totalBalanceText">฿0.00</h2>
-          
-          <div class="grid grid-cols-2 gap-2 mt-5 pt-3 border-t border-white/20 text-xs">
-            <div>
-              <p class="text-sky-200 text-[10px]">รายรับรวม</p>
-              <p class="text-sm font-bold text-emerald-300 totalIncomeText">฿0.00</p>
-            </div>
-            <div>
-              <p class="text-sky-200 text-[10px]">รายจ่ายรวม</p>
-              <p class="text-sm font-bold text-rose-300 totalExpenseText">฿0.00</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter Bar -->
-        <div class="bg-slate-950 p-3 rounded-2xl flex items-center justify-between border border-slate-800">
-          <span class="text-xs text-slate-400 font-medium">🗓️ ตัวกรอง:</span>
-          <select class="filterTypeControl bg-slate-900 text-xs text-slate-200 p-1.5 rounded-xl border border-slate-700 outline-none">
-            <option value="all">ทั้งหมด</option>
-            <option value="daily">รายวัน</option>
-            <option value="monthly">รายเดือน</option>
-            <option value="yearly">รายปี</option>
-          </select>
-        </div>
-
-        <!-- Recent Transactions -->
-        <div>
-          <div class="flex justify-between items-center mb-2.5">
-            <h3 class="text-xs font-bold text-slate-300">รายการล่าสุด</h3>
-          </div>
-          <div class="mbRecentList space-y-2"></div>
-        </div>
-      </section>
-
-      <!-- ================= MOBILE PAGE 2: ADD TRANSACTION ================= -->
-      <section id="mbPageAdd" class="hidden space-y-4">
-        <div class="bg-slate-950 p-5 rounded-3xl border border-slate-800 space-y-3">
-          <h3 class="text-sm font-bold text-sky-400">➕ ทำรายการใหม่</h3>
-          
-          <form class="mbTransForm space-y-3">
-            <div>
-              <label class="text-[11px] text-slate-400">ประเภทรายการ</label>
-              <select class="transTypeInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs mt-1 text-slate-200 outline-none">
-                <option value="expense">🔻 รายจ่าย</option>
-                <option value="income">🟢 รายรับ</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="text-[11px] text-slate-400">จำนวนเงิน (บาท)</label>
-              <input type="number" step="0.01" required placeholder="0.00" class="transAmountInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-sm mt-1 text-sky-400 font-bold outline-none">
-            </div>
-
-            <div>
-              <label class="text-[11px] text-slate-400">หมวดหมู่</label>
-              <select class="transCategoryInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs mt-1 text-slate-200 outline-none">
-              </select>
-            </div>
-
-            <div>
-              <label class="text-[11px] text-slate-400">รายละเอียด</label>
-              <input type="text" required placeholder="เช่น ค่าอาหาร, เติมน้ำมัน" class="transTitleInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs mt-1 text-slate-200 outline-none">
-            </div>
-
-            <div class="p-3 bg-slate-900/80 border border-sky-500/30 rounded-xl space-y-2">
-              <label class="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" class="linkFriendCheck rounded accent-sky-500">
-                <span class="text-xs font-semibold text-sky-300">🔗 ลิงก์รายการนี้กับเพื่อน</span>
-              </label>
-              <div class="linkFriendBox hidden pt-2 border-t border-slate-800">
-                <select class="targetFriendSelect w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-200"></select>
-              </div>
-            </div>
-
-            <div>
-              <label class="text-[11px] text-slate-400">วันที่ทำรายการ</label>
-              <input type="date" required class="transDateInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs mt-1 text-slate-200 outline-none">
-            </div>
-
-            <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-sky-500/20 transition text-xs mt-2">
-              บันทึกรายการ
-            </button>
-          </form>
-        </div>
-      </section>
-
-      <!-- ================= MOBILE PAGE 3: HISTORY ================= -->
-      <section id="mbPageHistory" class="hidden space-y-3">
-        <h3 class="text-xs font-bold text-slate-300">📜 ประวัติธุรกรรมทั้งหมด</h3>
-        <div class="mbHistoryList space-y-2"></div>
-      </section>
-
-      <!-- ================= MOBILE PAGE 4: PROFILE ================= -->
-      <section id="mbPageProfile" class="hidden space-y-4">
-        <div class="bg-slate-950 p-6 rounded-3xl border border-slate-800 text-center space-y-3">
-          <div class="w-16 h-16 mx-auto rounded-full bg-sky-500/20 border border-sky-400 flex items-center justify-center font-bold text-2xl text-sky-400 activeUserAvatar">
-            M
+      <!-- Profile Settings -->
+      <div id="dtPageProfile" class="hidden bg-slate-950 p-8 rounded-2xl border border-slate-800 max-w-xl mx-auto space-y-6">
+        <h3 class="text-lg font-bold text-sky-400 border-b border-slate-800 pb-3">⚙️ ตั้งค่าโปรไฟล์ส่วนตัว</h3>
+        <form id="profileForm" class="space-y-4">
+          <div>
+            <label class="text-xs text-slate-400">ชื่อแสดงในระบบ (Display Name)</label>
+            <input type="text" id="editDisplayName" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white mt-1 outline-none focus:border-sky-500">
           </div>
           <div>
-            <h3 class="text-base font-bold text-white activeUserText">MJ</h3>
-            <p class="text-[11px] text-slate-400">บัญชีผู้ใช้งานระบบ Mobile Banking</p>
+            <label class="text-xs text-slate-400">เบอร์โทรศัพท์ยึด 2FA (Phone)</label>
+            <input type="tel" id="editPhone" placeholder="+66812345678" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-3 text-xs text-white mt-1 outline-none focus:border-sky-500">
           </div>
-        </div>
-      </section>
-
+          <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 rounded-xl text-xs transition">บันทึกข้อมูลโปรไฟล์</button>
+        </form>
+      </div>
     </main>
-
-    <!-- Mobile Bottom Tab Navigation (แถบเมนูแอปมือถือ) -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-800 grid grid-cols-4 p-2 text-center text-[10px] text-slate-400 z-50">
-      <button onclick="mbSwitchTab('dashboard')" id="mbNavDashboard" class="flex flex-col items-center py-1 text-sky-400 font-semibold">
-        <span class="text-base">🏠</span>
-        <span>หน้าหลัก</span>
-      </button>
-      <button onclick="mbSwitchTab('add')" id="mbNavAdd" class="flex flex-col items-center py-1 hover:text-sky-400">
-        <span class="text-base">➕</span>
-        <span>ทำรายการ</span>
-      </button>
-      <button onclick="mbSwitchTab('history')" id="mbNavHistory" class="flex flex-col items-center py-1 hover:text-sky-400">
-        <span class="text-base">📜</span>
-        <span>ประวัติ</span>
-      </button>
-      <button onclick="mbSwitchTab('profile')" id="mbNavProfile" class="flex flex-col items-center py-1 hover:text-sky-400">
-        <span class="text-base">👤</span>
-        <span>โปรไฟล์</span>
-      </button>
-    </nav>
-
   </div>
 
-  <!-- Firebase Scripts -->
+  <!-- ================================================================= -->
+  <!-- 📱 DISPLAY 2: MOBILE NATIVE APP -->
+  <!-- ================================================================= -->
+  <div class="md:hidden min-h-screen w-full bg-slate-900 flex flex-col justify-between relative overflow-hidden select-none">
+    <header class="bg-slate-950 border-b border-slate-800 p-4 flex justify-between items-center sticky top-0 z-10">
+      <div class="flex items-center gap-3">
+        <img class="w-8 h-8 rounded-full border border-sky-400 userAvatarImg" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+        <div>
+          <p class="text-xs font-bold text-white userDisplayName">กำลังโหลด...</p>
+          <p class="text-[9px] text-slate-400 userEmailText">-</p>
+        </div>
+      </div>
+      <button onclick="logout()" class="text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-1 rounded-lg font-medium">ออก</button>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 space-y-4 mb-16 no-scrollbar">
+      <section id="mbPageDashboard" class="space-y-4">
+        <div class="bg-gradient-to-br from-sky-600 to-blue-700 rounded-3xl p-5 text-white shadow-xl">
+          <p class="text-[11px] text-sky-100">ยอดเงินคงเหลือ</p>
+          <h2 class="text-3xl font-extrabold mt-1 totalBalanceText">฿0.00</h2>
+          <div class="grid grid-cols-2 gap-2 mt-4 pt-3 border-t border-white/20 text-xs">
+            <div><p class="text-sky-200 text-[10px]">รายรับ</p><p class="text-sm font-bold text-emerald-300 totalIncomeText">฿0.00</p></div>
+            <div><p class="text-sky-200 text-[10px]">รายจ่าย</p><p class="text-sm font-bold text-rose-300 totalExpenseText">฿0.00</p></div>
+          </div>
+        </div>
+        <div class="mbListContainer space-y-2"></div>
+      </section>
+
+      <section id="mbPageAdd" class="hidden bg-slate-950 p-5 rounded-3xl border border-slate-800 space-y-3">
+        <h3 class="text-xs font-bold text-sky-400">➕ ทำรายการใหม่</h3>
+        <form class="transForm space-y-3">
+          <select class="transTypeInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"><option value="expense">🔻 รายจ่าย</option><option value="income">🟢 รายรับ</option></select>
+          <input type="number" step="0.01" required placeholder="จำนวนเงิน" class="transAmountInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-sky-400 font-bold">
+          <select class="transCategoryInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white"></select>
+          <input type="text" required placeholder="รายละเอียด" class="transTitleInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
+          <input type="date" required class="transDateInput w-full bg-slate-900 border border-slate-700 rounded-xl p-2.5 text-xs text-white">
+          <button type="submit" class="w-full bg-sky-500 text-white font-bold py-2.5 rounded-xl text-xs">บันทึก</button>
+        </form>
+      </section>
+
+      <section id="mbPageProfile" class="hidden bg-slate-950 p-5 rounded-3xl border border-slate-800 space-y-4">
+        <div class="text-center space-y-2">
+          <img class="w-16 h-16 rounded-full mx-auto border-2 border-sky-400 userAvatarImg" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
+          <h3 class="text-sm font-bold text-white userDisplayName">-</h3>
+          <p class="text-[10px] text-slate-400 userEmailText">-</p>
+        </div>
+        <form id="mbProfileForm" class="space-y-3 pt-3 border-t border-slate-800">
+          <div><label class="text-[10px] text-slate-400">ชื่อแสดงในระบบ</label><input type="text" id="mbEditDisplayName" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white mt-1"></div>
+          <div><label class="text-[10px] text-slate-400">เบอร์โทรศัพท์ (2FA)</label><input type="tel" id="mbEditPhone" placeholder="+66812345678" class="w-full bg-slate-900 border border-slate-700 rounded-xl p-2 text-xs text-white mt-1"></div>
+          <button type="submit" class="w-full bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs">อัปเดตโปรไฟล์</button>
+        </form>
+      </section>
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950 border-t border-slate-800 grid grid-cols-3 p-2 text-center text-[10px] text-slate-400 z-50">
+      <button onclick="mbSwitchTab('dashboard')" id="mbNavDashboard" class="py-1 text-sky-400 font-semibold">🏠 หน้าหลัก</button>
+      <button onclick="mbSwitchTab('add')" id="mbNavAdd" class="py-1">➕ ทำรายการ</button>
+      <button onclick="mbSwitchTab('profile')" id="mbNavProfile" class="py-1">👤 โปรไฟล์</button>
+    </nav>
+  </div>
+
+  <!-- Firebase Auth & DB Script -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, RecaptchaVerifier, signInWithPhoneNumber, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
@@ -381,144 +233,170 @@
     };
 
     const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const db = getDatabase(app);
+    const googleProvider = new GoogleAuthProvider();
 
-    const users = [
-      { id: "MJ", name: "MJ (ผู้ใช้หลัก)" },
-      { id: "FriendA", name: "เพื่อน A" },
-      { id: "FriendB", name: "เพื่อน B" }
-    ];
-
-    let currentUser = "MJ";
+    let currentUser = null;
+    let confirmationResult = null;
     let allTransactions = [];
 
     const categories = {
-      income: ["เงินเดือน", "โบนัส", "โอนเข้า/เพื่อนโอนคืน", "อื่นๆ"],
-      expense: ["อาหาร/เครื่องดื่ม", "เดินทาง", "ที่พัก/ค่าน้ำไฟ", "โอนออก/เพื่อนยืม", "อื่นๆ"]
+      income: ["เงินเดือน", "โบนัส", "โอนเข้า", "อื่นๆ"],
+      expense: ["อาหาร/เครื่องดื่ม", "เดินทาง", "ที่พัก/ค่าน้ำไฟ", "โอนออก", "อื่นๆ"]
     };
 
-    // ล็อคป้องกัน Gesture Pinch-Zoom ในมือถือ
-    document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
-
-    // Global Sync Functions
-    window.currentUser = currentUser;
-
-    // Desktop Tab Switcher
-    window.dtSwitchTab = (tab) => {
-      ["dashboard", "add", "history"].forEach(t => {
-        document.getElementById(`dtPage${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add("hidden");
-        document.getElementById(`dtNav${t.charAt(0).toUpperCase() + t.slice(1)}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-slate-800 transition";
-      });
-      document.getElementById(`dtPage${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove("hidden");
-      document.getElementById(`dtNav${tab.charAt(0).toUpperCase() + tab.slice(1)}`).className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20 font-semibold";
-    };
-
-    // Mobile Tab Switcher
-    window.mbSwitchTab = (tab) => {
-      ["dashboard", "add", "history", "profile"].forEach(t => {
-        document.getElementById(`mbPage${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add("hidden");
-        const nav = document.getElementById(`mbNav${t.charAt(0).toUpperCase() + t.slice(1)}`);
-        nav.classList.remove("text-sky-400", "font-semibold");
-        nav.classList.add("text-slate-400");
-      });
-      document.getElementById(`mbPage${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove("hidden");
-      const activeNav = document.getElementById(`mbNav${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
-      activeNav.classList.add("text-sky-400", "font-semibold");
-      activeNav.classList.remove("text-slate-400");
-    };
-
-    // Event Syncing (ผูกฟังก์ชัน 2 หน้าจอเข้าด้วยกัน)
-    document.querySelectorAll('.userSelectControl').forEach(select => {
-      select.addEventListener('change', (e) => {
-        currentUser = e.target.value;
-        document.querySelectorAll('.userSelectControl').forEach(s => s.value = currentUser);
-        document.querySelectorAll('.activeUserText').forEach(t => t.textContent = currentUser);
-        document.querySelectorAll('.activeUserAvatar').forEach(a => a.textContent = currentUser.charAt(0));
-        updateFriendDropdowns();
-        listenData();
-      });
+    // 1. Google Login Step
+    document.getElementById('btnGoogleAuth').addEventListener('click', async () => {
+      try {
+        const result = await signInWithPopup(auth, googleProvider);
+        currentUser = result.user;
+        
+        // Switch to 2FA Step
+        document.getElementById('stepGoogleLogin').classList.add('hidden');
+        document.getElementById('step2FA').classList.remove('hidden');
+        setupRecaptcha();
+      } catch (err) {
+        alert("เข้าสู่ระบบด้วย Google ไม่สำเร็จ: " + err.message);
+      }
     });
 
-    function updateFriendDropdowns() {
-      const friends = users.filter(u => u.id !== currentUser);
-      document.querySelectorAll('.targetFriendSelect').forEach(select => {
-        select.innerHTML = friends.map(f => `<option value="${f.id}">${f.name}</option>`).join("");
-      });
+    // 2FA Setup
+    function setupRecaptcha() {
+      if (!window.recaptchaVerifier) {
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+      }
     }
 
+    document.getElementById('btnSendOtp').addEventListener('click', async () => {
+      const phoneNumber = document.getElementById('phoneNumberInput').value;
+      if (!phoneNumber) return alert("กรุณากรอกเบอร์โทรศัพท์ เช่น +66812345678");
+      
+      try {
+        confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+        document.getElementById('sendOtpBox').classList.add('hidden');
+        document.getElementById('verifyOtpBox').classList.remove('hidden');
+        alert("ส่งรหัส OTP เรียบร้อยแล้ว!");
+      } catch (err) {
+        alert("ส่ง OTP ไม่สำเร็จ: " + err.message);
+      }
+    });
+
+    document.getElementById('btnVerifyOtp').addEventListener('click', async () => {
+      const code = document.getElementById('otpCodeInput').value;
+      try {
+        await confirmationResult.confirm(code);
+        document.getElementById('authModal').classList.add('hidden');
+        initUserSession();
+      } catch (err) {
+        alert("รหัส OTP ไม่ถูกต้อง!");
+      }
+    });
+
+    // Auth Observer
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        document.getElementById('authModal').classList.add('hidden');
+        initUserSession();
+      } else {
+        document.getElementById('authModal').classList.remove('hidden');
+      }
+    });
+
+    function initUserSession() {
+      const name = currentUser.displayName || "ผู้ใช้งาน MJ";
+      const email = currentUser.email || "";
+      const photo = currentUser.photoURL || "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+
+      document.querySelectorAll('.userDisplayName').forEach(e => e.textContent = name);
+      document.querySelectorAll('.userEmailText').forEach(e => e.textContent = email);
+      document.querySelectorAll('.userAvatarImg').forEach(e => e.src = photo);
+
+      document.getElementById('editDisplayName').value = name;
+      document.getElementById('mbEditDisplayName').value = name;
+
+      listenData();
+    }
+
+    // Profile Settings Form
+    const handleProfileUpdate = async (e) => {
+      e.preventDefault();
+      const newName = e.target.querySelector('input[type="text"]').value;
+      try {
+        await updateProfile(auth.currentUser, { displayName: newName });
+        alert("อัปเดตโปรไฟล์เรียบร้อยแล้วค่ะ!");
+        initUserSession();
+      } catch (err) {
+        alert("แก้ไขไม่สำเร็จ: " + err.message);
+      }
+    };
+
+    document.getElementById('profileForm').addEventListener('submit', handleProfileUpdate);
+    document.getElementById('mbProfileForm').addEventListener('submit', handleProfileUpdate);
+
+    // Logout
+    window.logout = () => {
+      signOut(auth).then(() => location.reload());
+    };
+
+    // Global Navigation
+    window.dtSwitchTab = (tab) => {
+      ["dashboard", "add", "profile"].forEach(t => document.getElementById(`dtPage${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add("hidden"));
+      document.getElementById(`dtPage${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove("hidden");
+    };
+
+    window.mbSwitchTab = (tab) => {
+      ["dashboard", "add", "profile"].forEach(t => document.getElementById(`mbPage${t.charAt(0).toUpperCase() + t.slice(1)}`).classList.add("hidden"));
+      document.getElementById(`mbPage${tab.charAt(0).toUpperCase() + tab.slice(1)}`).classList.remove("hidden");
+    };
+
+    // Category Sync
     function updateCategories() {
       document.querySelectorAll('.transTypeInput').forEach(typeSelect => {
-        const selectedType = typeSelect.value;
-        const form = typeSelect.closest('form');
-        const catSelect = form.querySelector('.transCategoryInput');
-        catSelect.innerHTML = categories[selectedType].map(c => `<option value="${c}">${c}</option>`).join("");
+        const catSelect = typeSelect.closest('form').querySelector('.transCategoryInput');
+        catSelect.innerHTML = categories[typeSelect.value].map(c => `<option value="${c}">${c}</option>`).join("");
       });
     }
-
     document.querySelectorAll('.transTypeInput').forEach(s => s.addEventListener('change', updateCategories));
-    
-    document.querySelectorAll('.linkFriendCheck').forEach(chk => {
-      chk.addEventListener('change', (e) => {
-        const form = e.target.closest('form');
-        form.querySelector('.linkFriendBox').classList.toggle('hidden', !e.target.checked);
+
+    // Handle Transaction Form
+    document.querySelectorAll('.transForm').forEach(form => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const f = e.target;
+        const newTrans = {
+          type: f.querySelector('.transTypeInput').value,
+          amount: parseFloat(f.querySelector('.transAmountInput').value),
+          category: f.querySelector('.transCategoryInput').value,
+          title: f.querySelector('.transTitleInput').value,
+          date: f.querySelector('.transDateInput').value,
+          createdAt: Date.now()
+        };
+        await push(ref(db, `transactions/${currentUser.uid}`), newTrans);
+        f.reset();
+        document.querySelectorAll('.transDateInput').forEach(i => i.value = new Date().toISOString().split("T")[0]);
+        updateCategories();
+        dtSwitchTab('dashboard');
+        mbSwitchTab('dashboard');
       });
     });
 
-    // Handle Forms ( Desktop & Mobile )
-    const handleFormSubmit = async (e) => {
-      e.preventDefault();
-      const form = e.target;
-      const type = form.querySelector('.transTypeInput').value;
-      const amount = parseFloat(form.querySelector('.transAmountInput').value);
-      const category = form.querySelector('.transCategoryInput').value;
-      const title = form.querySelector('.transTitleInput').value;
-      const date = form.querySelector('.transDateInput').value;
-      const isLinked = form.querySelector('.linkFriendCheck').checked;
-
-      const newTrans = { type, amount, category, title, date, createdAt: Date.now() };
-
-      await push(ref(db, `transactions/${currentUser}`), newTrans);
-
-      if (isLinked) {
-        const friendId = form.querySelector('.targetFriendSelect').value;
-        const linkedTrans = {
-          type: type === "expense" ? "income" : "expense",
-          amount: amount,
-          category: "รายการลิงก์เพื่อน",
-          title: `${title} (ลิงก์จาก ${currentUser})`,
-          date: date,
-          createdAt: Date.now()
-        };
-        await push(ref(db, `transactions/${friendId}`), linkedTrans);
-      }
-
-      form.reset();
-      document.querySelectorAll('.transDateInput').forEach(i => i.value = new Date().toISOString().split("T")[0]);
-      document.querySelectorAll('.linkFriendBox').forEach(b => b.classList.add('hidden'));
-      updateCategories();
-      dtSwitchTab('dashboard');
-      mbSwitchTab('dashboard');
-    };
-
-    document.querySelectorAll('.dtTransForm, .mbTransForm').forEach(f => f.addEventListener('submit', handleFormSubmit));
-
-    // Delete item
+    // Delete Item
     window.deleteTrans = async (id) => {
-      if (confirm("ต้องการลบรายการนี้ใช่ไหม?")) {
-        await remove(ref(db, `transactions/${currentUser}/${id}`));
+      if (confirm("ลบรายการนี้ใช่ไหม?")) {
+        await remove(ref(db, `transactions/${currentUser.uid}/${id}`));
       }
     };
 
     // Realtime Listener
     function listenData() {
-      const transRef = ref(db, `transactions/${currentUser}`);
-      onValue(transRef, (snapshot) => {
+      if (!currentUser) return;
+      onValue(ref(db, `transactions/${currentUser.uid}`), (snapshot) => {
         const data = snapshot.val();
         allTransactions = [];
         if (data) {
-          Object.keys(data).forEach(key => {
-            allTransactions.push({ id: key, ...data[key] });
-          });
+          Object.keys(data).forEach(key => allTransactions.push({ id: key, ...data[key] }));
         }
         allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
         renderUI();
@@ -526,16 +404,8 @@
     }
 
     function renderUI() {
-      const mode = document.querySelector('.filterTypeControl').value;
-      const today = new Date().toISOString().split("T")[0];
-
-      let filtered = allTransactions;
-      if (mode === "daily") filtered = allTransactions.filter(t => t.date === today);
-      if (mode === "monthly") filtered = allTransactions.filter(t => t.date.startsWith(today.slice(0, 7)));
-      if (mode === "yearly") filtered = allTransactions.filter(t => t.date.startsWith(today.slice(0, 4)));
-
       let inc = 0, exp = 0;
-      filtered.forEach(t => {
+      allTransactions.forEach(t => {
         if (t.type === "income") inc += t.amount;
         if (t.type === "expense") exp += t.amount;
       });
@@ -544,38 +414,11 @@
       document.querySelectorAll('.totalExpenseText').forEach(e => e.textContent = `฿${exp.toLocaleString('th-TH', {minimumFractionDigits:2})}`);
       document.querySelectorAll('.totalBalanceText').forEach(e => e.textContent = `฿${(inc - exp).toLocaleString('th-TH', {minimumFractionDigits:2})}`);
 
-      // Render Desktop Table
-      const dtTableBody = document.querySelector('.dtTableBody');
-      dtTableBody.innerHTML = filtered.map(t => `
-        <tr class="hover:bg-slate-900/50 transition">
-          <td class="p-3 text-slate-400">${t.date}</td>
-          <td class="p-3">
-            <span class="px-2.5 py-1 rounded-full text-[11px] font-semibold ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
-              ${t.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
-            </span>
-          </td>
-          <td class="p-3 text-slate-200 font-medium">${t.category}</td>
-          <td class="p-3 text-slate-400">${t.title}</td>
-          <td class="p-3 text-right font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">
-            ${t.type === 'income' ? '+' : '-'}${t.amount.toLocaleString('th-TH', {minimumFractionDigits:2})}
-          </td>
-          <td class="p-3 text-center">
-            <button onclick="deleteTrans('${t.id}')" class="text-slate-500 hover:text-rose-400 text-xs">🗑️ ลบ</button>
-          </td>
-        </tr>
-      `).join("");
-
-      // Render Mobile Items
-      const generateMobileHTML = (list) => list.map(t => `
-        <div class="bg-slate-950 p-3 rounded-2xl flex items-center justify-between border border-slate-800">
-          <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl flex items-center justify-center text-xs ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
-              ${t.type === 'income' ? '⇣' : '⇡'}
-            </div>
-            <div>
-              <p class="text-xs font-bold text-slate-200">${t.title}</p>
-              <p class="text-[10px] text-slate-400">${t.date} • ${t.category}</p>
-            </div>
+      const html = allTransactions.map(t => `
+        <div class="bg-slate-900 p-3 rounded-2xl flex items-center justify-between border border-slate-800">
+          <div>
+            <p class="text-xs font-bold text-slate-200">${t.title}</p>
+            <p class="text-[10px] text-slate-400">${t.date} • ${t.category}</p>
           </div>
           <div class="text-right flex items-center gap-2">
             <span class="text-xs font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">
@@ -586,28 +429,13 @@
         </div>
       `).join("");
 
-      document.querySelector('.mbRecentList').innerHTML = generateMobileHTML(filtered.slice(0, 5));
-      document.querySelector('.mbHistoryList').innerHTML = generateMobileHTML(filtered);
-      document.querySelector('.dtHistoryContainer').innerHTML = generateMobileHTML(filtered);
+      document.querySelector('.dtTableContainer').innerHTML = html;
+      document.querySelector('.mbListContainer').innerHTML = html;
     }
 
-    // Sync Filter
-    document.querySelectorAll('.filterTypeControl').forEach(f => {
-      f.addEventListener('change', (e) => {
-        document.querySelectorAll('.filterTypeControl').forEach(s => s.value = e.target.value);
-        renderUI();
-      });
-    });
-
-    // Init
+    // Init Dates
     document.querySelectorAll('.transDateInput').forEach(i => i.value = new Date().toISOString().split("T")[0]);
     updateCategories();
-    updateFriendDropdowns();
-    listenData();
-
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
-    }
   </script>
 </body>
 </html>
