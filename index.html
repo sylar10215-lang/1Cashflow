@@ -105,7 +105,7 @@
             </div>
             <div id="incomeRows" class="space-y-2"></div>
             <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2 border-t border-stone-200 dark:border-stone-700">
-              <span class="col-span-5">ผลรวมรายรับ</span>
+              <span class="col-span-5">ผลรวมรายรับหลัก</span>
               <span id="totIncEst" class="col-span-2 text-right">0</span>
               <span id="totIncAct" class="col-span-3 text-right">0</span>
               <span id="totIncDiff" class="col-span-2 text-right">0</span>
@@ -122,7 +122,7 @@
             </div>
             <div id="expenseRows" class="space-y-2"></div>
             <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2 border-t border-stone-200 dark:border-stone-700">
-              <span class="col-span-5">ผลรวมรายจ่าย</span>
+              <span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
               <span id="totExpEst" class="col-span-2 text-right">0</span>
               <span id="totExpAct" class="col-span-3 text-right">0</span>
               <span id="totExpDiff" class="col-span-2 text-right">0</span>
@@ -130,8 +130,9 @@
           </div>
         </div>
 
-        <!-- Extra Table -->
+        <!-- Extra Table (ฝั่งขวา) -->
         <div class="lg:col-span-4 space-y-6 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+          <!-- รายรับเสริม -->
           <div class="space-y-2">
             <h3 class="text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
             <div class="space-y-2 text-xs">
@@ -147,9 +148,15 @@
                 <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
                 <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
               </div>
+              <!-- ช่องสรุปยอดรวมรายรับเสริม -->
+              <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
+                <span class="text-emerald-500">รวมรายรับเสริม:</span>
+                <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
+              </div>
             </div>
           </div>
 
+          <!-- รายจ่ายฝั่งไทย -->
           <div class="space-y-2 pt-4 border-t border-stone-200 dark:border-stone-800">
             <h3 class="text-xs font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
             <div class="space-y-2 text-xs">
@@ -161,24 +168,29 @@
                 <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
                 <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
               </div>
+              <!-- ช่องสรุปยอดรวมรายจ่ายฝั่งไทย -->
+              <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
+                <span class="text-rose-500">รวมรายจ่ายไทย:</span>
+                <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Summary -->
+      <!-- Summary Box (รวมยอดทั้งหมด) -->
       <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
         <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
           <div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับ</p>
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p>
             <p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-500">0</p>
           </div>
           <div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่าย</p>
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p>
             <p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-500">0</p>
           </div>
           <div>
-            <p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือ</p>
+            <p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p>
             <p id="finalBalance" class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">0</p>
           </div>
         </div>
@@ -188,9 +200,7 @@
     <!-- VIEW 2: COMMUNITY & MEMBERS LIST -->
     <div id="viewCommunity" class="hidden space-y-4">
       <h3 class="text-sm font-bold text-amber-500">👥 สมาชิกทั้งหมดในระบบ (คลิกที่ชื่อเพื่อส่องตารางการเงิน)</h3>
-      <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        <!-- รายชื่อสมาชิกจะแสดงที่นี่ -->
-      </div>
+      <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
     </div>
 
   </div>
@@ -257,7 +267,6 @@
       document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
       document.getElementById('themeText').textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
     }
-    // เริ่มต้นที่โหมดมืด
     document.documentElement.classList.add('dark');
 
     // --- AUTHENTICATION ---
@@ -274,7 +283,6 @@
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('mainDashboard').classList.remove('hidden');
         
-        // อัปเดตข้อมูลผู้ใช้เบื้องต้นลงฐานข้อมูล
         db.ref('users/' + user.uid + '/profile').update({
           displayName: user.displayName || 'ผู้ใช้งาน MJ',
           photoURL: user.photoURL || 'https://via.placeholder.com/150',
@@ -334,7 +342,6 @@
         viewMy.classList.remove('hidden');
         viewCom.classList.add('hidden');
         
-        // สลับกลับมาดูตารางตัวเอง
         viewingOtherUser = false;
         document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
         document.getElementById('tableActions').classList.remove('hidden');
@@ -515,7 +522,9 @@
       statusEl.className = `text-[10px] px-2 py-0.5 rounded ${colorClass}`;
     }
 
+    // --- UPDATED CALCULATIONS LOGIC ---
     function calculate() {
+      // 1. คำนวณตารางฝั่งซ้าย (รายรับหลัก)
       let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
       document.querySelectorAll('.income-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
@@ -529,6 +538,7 @@
       document.getElementById('totIncAct').textContent = totIncAct.toLocaleString('th-TH');
       document.getElementById('totIncDiff').textContent = totIncDiff.toLocaleString('th-TH');
 
+      // 2. คำนวณตารางฝั่งซ้าย (รายจ่ายหลัก)
       let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
       document.querySelectorAll('.expense-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
@@ -542,13 +552,28 @@
       document.getElementById('totExpAct').textContent = totExpAct.toLocaleString('th-TH');
       document.getElementById('totExpDiff').textContent = totExpDiff.toLocaleString('th-TH');
 
-      const finalInc = totIncAct;
-      const finalExp = totExpAct;
-      const finalBal = finalInc - finalExp;
+      // 3. คำนวณตารางฝั่งขวา (รายรับเสริม + รายจ่ายฝั่งไทย)
+      const extInc1 = parseFloat(document.getElementById('extIncVal1').value) || 0;
+      const extInc2 = parseFloat(document.getElementById('extIncVal2').value) || 0;
+      const extInc3 = parseFloat(document.getElementById('extIncVal3').value) || 0;
+      const totalExtInc = extInc1 + extInc2 + extInc3;
 
-      document.getElementById('finalTotalIncome').textContent = finalInc.toLocaleString('th-TH');
-      document.getElementById('finalTotalExpense').textContent = finalExp.toLocaleString('th-TH');
-      document.getElementById('finalBalance').textContent = finalBal.toLocaleString('th-TH');
+      const extExp1 = parseFloat(document.getElementById('extExpVal1').value) || 0;
+      const extExp2 = parseFloat(document.getElementById('extExpVal2').value) || 0;
+      const totalExtExp = extExp1 + extExp2;
+
+      // แสดงผลรวมย่อยของฝั่งขวา
+      document.getElementById('subTotalExtInc').textContent = totalExtInc.toLocaleString('th-TH');
+      document.getElementById('subTotalExtExp').textContent = totalExtExp.toLocaleString('th-TH');
+
+      // 4. สรุปผลรวมทั้งหมด (รายรับหลัก + รายรับเสริม) & (รายจ่ายหลัก + รายจ่ายไทย)
+      const grandTotalIncome = totIncAct + totalExtInc;
+      const grandTotalExpense = totExpAct + totalExtExp;
+      const grandTotalBalance = grandTotalIncome - grandTotalExpense;
+
+      document.getElementById('finalTotalIncome').textContent = grandTotalIncome.toLocaleString('th-TH');
+      document.getElementById('finalTotalExpense').textContent = grandTotalExpense.toLocaleString('th-TH');
+      document.getElementById('finalBalance').textContent = grandTotalBalance.toLocaleString('th-TH');
     }
   </script>
 </body>
