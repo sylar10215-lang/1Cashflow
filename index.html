@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แอปรายรับ-รายจ่าย - MJ</title>
+  <title>MJ Bank App</title>
 
   <!-- PWA Settings -->
   <link rel="manifest" href="manifest.json">
@@ -12,127 +12,197 @@
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* ซ่อน scrollbar เพื่อความเรียบหรูสไตล์แอปมือถือ */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
 </head>
-<body class="bg-slate-100 min-h-screen text-slate-800 pb-10">
+<body class="bg-slate-900 text-slate-100 min-h-screen flex justify-center items-center">
 
-  <div class="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
-    <!-- Header -->
-    <header class="text-center py-4 bg-white rounded-2xl shadow-sm border border-slate-200 relative">
-      <h1 class="text-2xl md:text-3xl font-bold text-sky-600">💰 รายรับ - รายจ่าย</h1>
-      <p class="text-slate-500 text-sm mt-1">จัดการการเงินใกล้มือคุณ (MJ Edition)</p>
-      <!-- ปุ่มติดตั้ง PWA -->
-      <button id="installBtn" class="hidden absolute top-4 right-4 bg-sky-500 text-white text-xs px-3 py-1.5 rounded-xl font-medium shadow hover:bg-sky-600 transition">
-        📲 ติดตั้งแอป
+  <!-- Mobile Frame Container -->
+  <div class="w-full max-w-md bg-slate-800 min-h-screen md:min-h-[844px] md:max-h-[844px] md:rounded-[40px] md:border-[8px] md:border-slate-700 shadow-2xl flex flex-col justify-between overflow-hidden relative">
+
+    <!-- Top App Bar / Profile Switcher -->
+    <header class="bg-slate-800 border-b border-slate-700/60 p-4 flex justify-between items-center z-10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-sky-400 to-blue-600 flex items-center justify-center font-bold text-lg text-white shadow-md">
+          <span id="userAvatar">M</span>
+        </div>
+        <div>
+          <p class="text-xs text-slate-400">ยินดีต้อนรับ</p>
+          <select id="userSelect" class="bg-transparent font-semibold text-sky-400 text-sm focus:outline-none cursor-pointer">
+            <option value="MJ" class="bg-slate-800 text-white">MJ (ผู้ใช้หลัก)</option>
+            <option value="FriendA" class="bg-slate-800 text-white">เพื่อน A</option>
+            <option value="FriendB" class="bg-slate-800 text-white">เพื่อน B</option>
+          </select>
+        </div>
+      </div>
+      <button id="installBtn" class="hidden text-xs bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2.5 py-1 rounded-full">
+        📲 ติดตั้ง
       </button>
     </header>
 
-    <!-- สรุปรวมส่วนต่าง (Dashboard) -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-emerald-500">
-        <p class="text-sm font-medium text-slate-500">ยอดรวมรายรับ</p>
-        <p id="totalIncome" class="text-2xl font-bold text-emerald-600 mt-2">฿0.00</p>
-      </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-rose-500">
-        <p class="text-sm font-medium text-slate-500">ยอดรวมรายจ่าย</p>
-        <p id="totalExpense" class="text-2xl font-bold text-rose-600 mt-2">฿0.00</p>
-      </div>
-      <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-sky-500">
-        <p class="text-sm font-medium text-slate-500">คงเหลือ (ส่วนต่าง)</p>
-        <p id="totalBalance" class="text-2xl font-bold text-sky-600 mt-2">฿0.00</p>
-      </div>
-    </section>
+    <!-- Content Screen Area (แยกหน้าจอ) -->
+    <main class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
 
-    <!-- ตัวกรองเวลา (Filter) -->
-    <section class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="font-semibold text-slate-700">🗓️ ตัวกรอง:</span>
-        <select id="filterType" class="p-2 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-sky-400 outline-none">
-          <option value="all">ทั้งหมด</option>
-          <option value="daily">รายวัน</option>
-          <option value="monthly">รายเดือน</option>
-          <option value="yearly">รายปี</option>
-        </select>
-      </div>
-      <div id="filterValueContainer" class="hidden">
-        <input type="date" id="filterDate" class="p-2 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-sky-400 outline-none">
-        <input type="month" id="filterMonth" class="p-2 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-sky-400 outline-none hidden">
-        <input type="number" id="filterYear" placeholder="ปี ค.ศ. เช่น 2026" class="p-2 border rounded-xl bg-slate-50 text-sm focus:ring-2 focus:ring-sky-400 outline-none hidden w-36">
-      </div>
-    </section>
+      <!-- ================= PAGE 1: DASHBOARD (หน้าหลัก) ================= -->
+      <section id="pageDashboard" class="space-y-4">
+        <!-- Bank Card -->
+        <div class="bg-gradient-to-r from-sky-600 via-sky-500 to-blue-700 rounded-3xl p-6 text-white shadow-lg relative overflow-hidden">
+          <div class="absolute -right-4 -bottom-4 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
+          <p class="text-xs text-sky-100 font-medium">ยอดเงินคงเหลือรวม</p>
+          <h2 id="cardBalance" class="text-3xl font-extrabold mt-1 tracking-tight">฿0.00</h2>
+          
+          <div class="grid grid-cols-2 gap-2 mt-6 pt-4 border-t border-white/20 text-xs">
+            <div>
+              <p class="text-sky-200">รายรับรวม</p>
+              <p id="cardIncome" class="text-base font-bold text-emerald-300">฿0.00</p>
+            </div>
+            <div>
+              <p class="text-sky-200">รายจ่ายรวม</p>
+              <p id="cardExpense" class="text-base font-bold text-rose-300">฿0.00</p>
+            </div>
+          </div>
+        </div>
 
-    <!-- ฟอร์มบันทึกรายการ -->
-    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <h2 class="text-lg font-bold text-slate-700 mb-4">➕ บันทึกรายการใหม่</h2>
-      <form id="transactionForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm text-slate-600 mb-1">ประเภทรายการ</label>
-          <select id="type" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
-            <option value="expense">🔻 รายจ่าย</option>
-            <option value="income">🟢 รายรับ</option>
+        <!-- Filter Bar -->
+        <div class="bg-slate-700/40 p-3 rounded-2xl flex items-center justify-between border border-slate-700/50">
+          <span class="text-xs text-slate-400 font-medium">🗓️ ตัวกรอง:</span>
+          <select id="filterType" class="bg-slate-800 text-xs text-slate-200 p-1.5 rounded-xl border border-slate-600 focus:outline-none">
+            <option value="all">ทั้งหมด</option>
+            <option value="daily">รายวัน</option>
+            <option value="monthly">รายเดือน</option>
+            <option value="yearly">รายปี</option>
           </select>
         </div>
 
+        <!-- Recent Activity List -->
         <div>
-          <label class="block text-sm text-slate-600 mb-1">จำนวนเงิน (บาท)</label>
-          <input type="number" id="amount" step="0.01" required placeholder="0.00" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-slate-300">รายการล่าสุด</h3>
+            <span id="activeUserLabel" class="text-xs text-sky-400 font-medium"></span>
+          </div>
+          <div id="recentList" class="space-y-2.5">
+            <!-- Items loaded dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 2: ADD TRANSACTION (หน้าเพิ่มรายการ) ================= -->
+      <section id="pageAdd" class="hidden space-y-4">
+        <div class="bg-slate-700/30 p-5 rounded-3xl border border-slate-700/50 space-y-4">
+          <h3 class="text-base font-bold text-sky-400">➕ ทำรายการใหม่</h3>
+          
+          <form id="transForm" class="space-y-3">
+            <div>
+              <label class="text-xs text-slate-400">ประเภทรายการ</label>
+              <select id="transType" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm mt-1 focus:border-sky-500 outline-none">
+                <option value="expense">🔻 รายจ่าย</option>
+                <option value="income">🟢 รายรับ</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400">จำนวนเงิน (บาท)</label>
+              <input type="number" id="transAmount" step="0.01" required placeholder="0.00" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm mt-1 focus:border-sky-500 outline-none text-sky-400 font-bold">
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400">หมวดหมู่</label>
+              <select id="transCategory" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm mt-1 focus:border-sky-500 outline-none">
+                <!-- Dynamic options -->
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400">รายละเอียด</label>
+              <input type="text" id="transTitle" required placeholder="เช่น ค่าข้าว, ยืมเงิน" class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm mt-1 focus:border-sky-500 outline-none">
+            </div>
+
+            <!-- 🤝 ระบบลิงก์รายการกับเพื่อน -->
+            <div class="p-3 bg-slate-800/80 border border-sky-500/30 rounded-xl space-y-2">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" id="linkFriendCheck" class="rounded accent-sky-500">
+                <span class="text-xs font-semibold text-sky-300">🔗 ลิงก์รายการนี้กับเพื่อน</span>
+              </label>
+              <div id="linkFriendBox" class="hidden pt-2 border-t border-slate-700">
+                <label class="text-xs text-slate-400">เลือกเพื่อนที่จะทำรายการด้วย:</label>
+                <select id="targetFriend" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-xs mt-1 text-slate-200">
+                  <!-- Dynamic friends -->
+                </select>
+                <p class="text-[10px] text-slate-400 mt-1">* ระบบจะสร้างรายการฝั่งเพื่อนให้อัตโนมัติ (ตรงข้ามกับเรา)</p>
+              </div>
+            </div>
+
+            <div>
+              <label class="text-xs text-slate-400">วันที่ทำรายการ</label>
+              <input type="date" id="transDate" required class="w-full bg-slate-800 border border-slate-600 rounded-xl p-2.5 text-sm mt-1 focus:border-sky-500 outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-sky-500/30 transition mt-2">
+              บันทึกรายการ
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ================= PAGE 3: HISTORY (หน้าประวัติย้อนหลัง) ================= -->
+      <section id="pageHistory" class="hidden space-y-4">
+        <h3 class="text-base font-bold text-slate-200">📜 ประวัติธุรกรรมทั้งหมด</h3>
+        <div id="fullHistoryList" class="space-y-2.5">
+          <!-- Full list loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= PAGE 4: PROFILE (หน้าโปรไฟล์) ================= -->
+      <section id="pageProfile" class="hidden space-y-4">
+        <div class="bg-slate-700/30 p-6 rounded-3xl border border-slate-700/50 text-center space-y-3">
+          <div class="w-20 h-20 mx-auto rounded-full bg-sky-500/20 border-2 border-sky-400 flex items-center justify-center font-bold text-3xl text-sky-400">
+            <span id="profileAvatar">M</span>
+          </div>
+          <div>
+            <h3 id="profileName" class="text-lg font-bold text-white">MJ</h3>
+            <p class="text-xs text-slate-400">ผู้ใช้งานระบบการเงิน</p>
+          </div>
         </div>
 
-        <div>
-          <label class="block text-sm text-slate-600 mb-1">หมวดหมู่</label>
-          <select id="category" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
-            <!-- Dynamic Options -->
-          </select>
+        <div class="bg-slate-700/30 p-4 rounded-2xl border border-slate-700/50 space-y-2">
+          <h4 class="text-xs font-bold text-slate-400">ข้อมูลเชื่อมโยง</h4>
+          <p class="text-xs text-slate-300"> status: <span class="text-emerald-400 font-semibold">● ออนไลน์ (Firebase Realtime DB)</span></p>
+          <p class="text-xs text-slate-300"> ID บัญชี: <span class="text-sky-400">cashflow-e8505</span></p>
         </div>
+      </section>
 
-        <div>
-          <label class="block text-sm text-slate-600 mb-1">รายละเอียด / หมายเหตุ</label>
-          <input type="text" id="title" required placeholder="เช่น ค่าข้าว, เงินเดือน" class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
-        </div>
+    </main>
 
-        <div>
-          <label class="block text-sm text-slate-600 mb-1">วันที่ทำรายการ</label>
-          <input type="date" id="date" required class="w-full p-2.5 border rounded-xl bg-slate-50 focus:ring-2 focus:ring-sky-400 outline-none">
-        </div>
+    <!-- Bottom Navigation Bar (แถบเมนูธนาคารด้านล่าง) -->
+    <nav class="bg-slate-800/90 backdrop-blur-md border-t border-slate-700/60 grid grid-cols-4 p-2 text-center text-[10px] text-slate-400 z-10">
+      <button onclick="switchTab('dashboard')" id="navDashboard" class="flex flex-col items-center py-1 text-sky-400 font-semibold">
+        <span class="text-lg">🏠</span>
+        <span>หน้าหลัก</span>
+      </button>
+      <button onclick="switchTab('add')" id="navAdd" class="flex flex-col items-center py-1 hover:text-sky-400">
+        <span class="text-lg">➕</span>
+        <span>ทำรายการ</span>
+      </button>
+      <button onclick="switchTab('history')" id="navHistory" class="flex flex-col items-center py-1 hover:text-sky-400">
+        <span class="text-lg">📜</span>
+        <span>ประวัติ</span>
+      </button>
+      <button onclick="switchTab('profile')" id="navProfile" class="flex flex-col items-center py-1 hover:text-sky-400">
+        <span class="text-lg">👤</span>
+        <span>โปรไฟล์</span>
+      </button>
+    </nav>
 
-        <div class="md:col-span-2 flex justify-end">
-          <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white px-6 py-2.5 rounded-xl font-medium transition shadow-sm">
-            บันทึกรายการ
-          </button>
-        </div>
-      </form>
-    </section>
-
-    <!-- ตารางแสดงรายการ -->
-    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-      <h2 class="text-lg font-bold text-slate-700 mb-4">📜 ประวัติรายการ</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="border-b border-slate-200 text-slate-400 text-sm">
-              <th class="p-3">วันที่</th>
-              <th class="p-3">ประเภท</th>
-              <th class="p-3">หมวดหมู่</th>
-              <th class="p-3">รายการ</th>
-              <th class="p-3 text-right">จำนวนเงิน</th>
-              <th class="p-3 text-center">จัดการ</th>
-            </tr>
-          </thead>
-          <tbody id="transactionList" class="divide-y divide-slate-100 text-sm">
-            <!-- Loaded items from Firebase -->
-          </tbody>
-        </table>
-      </div>
-    </section>
   </div>
 
-  <!-- Firebase Scripts (Modular SDK v10 - Realtime Database) -->
+  <!-- Firebase Integration -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-      getDatabase, ref, push, onValue, remove 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Firebase Config ของ MJ
     const firebaseConfig = {
       apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
       authDomain: "cashflow-e8505.firebaseapp.com",
@@ -143,186 +213,195 @@
       appId: "1:841200170286:web:e418345aea281ca1eb36bf"
     };
 
-    // Initialize Firebase Realtime Database
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const transRef = ref(db, "transactions");
 
-    // หมวดหมู่
-    const categories = {
-      income: ["เงินเดือน", "โบนัส", "ธุรกิจส่วนตัว", "การลงทุน", "อื่นๆ"],
-      expense: ["อาหาร/เครื่องดื่ม", "การเดินทาง", "ที่พัก/ค่าน้ำค่าไฟ", "ช้อปปิ้ง", "ความบันเทิง", "อื่นๆ"]
-    };
+    // Profile list
+    const users = [
+      { id: "MJ", name: "MJ (ผู้ใช้หลัก)" },
+      { id: "FriendA", name: "เพื่อน A" },
+      { id: "FriendB", name: "เพื่อน B" }
+    ];
 
-    // DOM Elements
-    const typeSelect = document.getElementById("type");
-    const categorySelect = document.getElementById("category");
-    const form = document.getElementById("transactionForm");
-    const transactionList = document.getElementById("transactionList");
-    const dateInput = document.getElementById("date");
-
-    const filterType = document.getElementById("filterType");
-    const filterValueContainer = document.getElementById("filterValueContainer");
-    const filterDate = document.getElementById("filterDate");
-    const filterMonth = document.getElementById("filterMonth");
-    const filterYear = document.getElementById("filterYear");
-
-    // ตั้งค่า วันที่ปัจจุบัน
-    const today = new Date().toISOString().split("T")[0];
-    dateInput.value = today;
-    filterDate.value = today;
-    filterMonth.value = today.slice(0, 7);
-    filterYear.value = new Date().getFullYear();
-
+    let currentUser = "MJ";
     let allTransactions = [];
 
-    // เปลี่ยนหมวดหมู่ตามประเภท
-    function updateCategories() {
-      const selectedType = typeSelect.value;
-      categorySelect.innerHTML = categories[selectedType]
-        .map(cat => `<option value="${cat}">${cat}</option>`)
-        .join("");
-    }
-    typeSelect.addEventListener("change", updateCategories);
-    updateCategories();
+    const categories = {
+      income: ["เงินเดือน", "โบนัส", "โอนเข้า/เพื่อนโอนคืน", "อื่นๆ"],
+      expense: ["อาหาร/เครื่องดื่ม", "เดินทาง", "ที่พัก/ค่าน้ำไฟ", "โอนออก/เพื่อนยืม", "อื่นๆ"]
+    };
 
-    // บันทึกลง Realtime Database
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const newTransaction = {
-        type: typeSelect.value,
-        amount: parseFloat(document.getElementById("amount").value),
-        category: categorySelect.value,
-        title: document.getElementById("title").value,
-        date: dateInput.value,
-        createdAt: Date.now()
-      };
+    // Elements
+    const userSelect = document.getElementById("userSelect");
+    const userAvatar = document.getElementById("userAvatar");
+    const profileAvatar = document.getElementById("profileAvatar");
+    const profileName = document.getElementById("profileName");
+    const activeUserLabel = document.getElementById("activeUserLabel");
 
-      try {
-        await push(transRef, newTransaction);
-        form.reset();
-        dateInput.value = today;
-        updateCategories();
-      } catch (err) {
-        alert("เกิดข้อผิดพลาดในการบันทึก: " + err.message);
-      }
+    const transType = document.getElementById("transType");
+    const transCategory = document.getElementById("transCategory");
+    const linkFriendCheck = document.getElementById("linkFriendCheck");
+    const linkFriendBox = document.getElementById("linkFriendBox");
+    const targetFriend = document.getElementById("targetFriend");
+
+    // UI Tab Navigation
+    window.switchTab = (tabName) => {
+      const tabs = ["Dashboard", "Add", "History", "Profile"];
+      tabs.forEach(t => {
+        document.getElementById(`page${t}`).classList.add("hidden");
+        document.getElementById(`nav${t}`).classList.remove("text-sky-400", "font-semibold");
+        document.getElementById(`nav${t}`).classList.add("text-slate-400");
+      });
+
+      document.getElementById(`page${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`).classList.remove("hidden");
+      const activeNav = document.getElementById(`nav${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+      activeNav.classList.add("text-sky-400", "font-semibold");
+      activeNav.classList.remove("text-slate-400");
+    };
+
+    // User Switching
+    userSelect.addEventListener("change", (e) => {
+      currentUser = e.target.value;
+      userAvatar.textContent = currentUser.charAt(0);
+      profileAvatar.textContent = currentUser.charAt(0);
+      profileName.textContent = users.find(u => u.id === currentUser)?.name || currentUser;
+      activeUserLabel.textContent = `(${currentUser})`;
+      updateFriendDropdown();
+      listenData();
     });
 
-    // ลบรายการ
-    window.deleteTransaction = async (id) => {
+    function updateFriendDropdown() {
+      const friends = users.filter(u => u.id !== currentUser);
+      targetFriend.innerHTML = friends.map(f => `<option value="${f.id}">${f.name}</option>`).join("");
+    }
+
+    // Dynamic Categories
+    function updateCategories() {
+      transCategory.innerHTML = categories[transType.value]
+        .map(c => `<option value="${c}">${c}</option>`).join("");
+    }
+    transType.addEventListener("change", updateCategories);
+
+    // Link Friend Toggle
+    linkFriendCheck.addEventListener("change", () => {
+      linkFriendBox.classList.toggle("hidden", !linkFriendCheck.checked);
+    });
+
+    // Realtime Data Listener
+    function listenData() {
+      const transRef = ref(db, `transactions/${currentUser}`);
+      onValue(transRef, (snapshot) => {
+        const data = snapshot.val();
+        allTransactions = [];
+        if (data) {
+          Object.keys(data).forEach(key => {
+            allTransactions.push({ id: key, ...data[key] });
+          });
+        }
+        allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+        renderUI();
+      });
+    }
+
+    // Submit Form
+    document.getElementById("transForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById("transAmount").value);
+      const type = transType.value;
+      const title = document.getElementById("transTitle").value;
+      const category = transCategory.value;
+      const date = document.getElementById("transDate").value;
+
+      const newTrans = { type, amount, category, title, date, createdAt: Date.now() };
+
+      // เซฟฝั่งตัวเอง
+      await push(ref(db, `transactions/${currentUser}`), newTrans);
+
+      // ถ้าเปิดลิงก์กับเพื่อน -> สร้างรายการฝั่งเพื่อนแบบสะท้อนกลับ (Inverse)
+      if (linkFriendCheck.checked) {
+        const friendId = targetFriend.value;
+        const linkedTrans = {
+          type: type === "expense" ? "income" : "expense", // พวกรจ่ายฝั่งเรา = รายรับเพื่อน
+          amount: amount,
+          category: "รายการลิงก์เพื่อน",
+          title: `${title} (ลิงก์จาก ${currentUser})`,
+          date: date,
+          createdAt: Date.now()
+        };
+        await push(ref(db, `transactions/${friendId}`), linkedTrans);
+      }
+
+      document.getElementById("transForm").reset();
+      document.getElementById("transDate").value = new Date().toISOString().split("T")[0];
+      linkFriendCheck.checked = false;
+      linkFriendBox.classList.add("hidden");
+      updateCategories();
+      switchTab("dashboard");
+    });
+
+    // Delete item
+    window.deleteTrans = async (id) => {
       if (confirm("ต้องการลบรายการนี้ใช่ไหม?")) {
-        await remove(ref(db, `transactions/${id}`));
+        await remove(ref(db, `transactions/${currentUser}/${id}`));
       }
     };
 
-    // ดึงข้อมูล Realtime จาก Realtime Database
-    onValue(transRef, (snapshot) => {
-      const data = snapshot.val();
-      allTransactions = [];
-      if (data) {
-        Object.keys(data).forEach(key => {
-          allTransactions.push({ id: key, ...data[key] });
-        });
-      }
-      // เรียงจากวันที่ล่าสุดไปเก่าสุด
-      allTransactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-      renderUI();
-    });
-
-    // คำนวณสรุปยอด + กรองข้อมูล
+    // Render Function
     function renderUI() {
-      const mode = filterType.value;
+      const mode = document.getElementById("filterType").value;
+      const today = new Date().toISOString().split("T")[0];
+
       let filtered = allTransactions;
+      if (mode === "daily") filtered = allTransactions.filter(t => t.date === today);
+      if (mode === "monthly") filtered = allTransactions.filter(t => t.date.startsWith(today.slice(0, 7)));
+      if (mode === "yearly") filtered = allTransactions.filter(t => t.date.startsWith(today.slice(0, 4)));
 
-      if (mode === "daily" && filterDate.value) {
-        filtered = allTransactions.filter(item => item.date === filterDate.value);
-      } else if (mode === "monthly" && filterMonth.value) {
-        filtered = allTransactions.filter(item => item.date.startsWith(filterMonth.value));
-      } else if (mode === "yearly" && filterYear.value) {
-        filtered = allTransactions.filter(item => item.date.startsWith(filterYear.value));
-      }
-
-      let totalInc = 0;
-      let totalExp = 0;
-
-      filtered.forEach(item => {
-        if (item.type === "income") totalInc += item.amount;
-        if (item.type === "expense") totalExp += item.amount;
+      let inc = 0, exp = 0;
+      filtered.forEach(t => {
+        if (t.type === "income") inc += t.amount;
+        if (t.type === "expense") exp += t.amount;
       });
 
-      const balance = totalInc - totalExp;
+      document.getElementById("cardIncome").textContent = `฿${inc.toLocaleString('th-TH', {minimumFractionDigits:2})}`;
+      document.getElementById("cardExpense").textContent = `฿${exp.toLocaleString('th-TH', {minimumFractionDigits:2})}`;
+      document.getElementById("cardBalance").textContent = `฿${(inc - exp).toLocaleString('th-TH', {minimumFractionDigits:2})}`;
 
-      document.getElementById("totalIncome").textContent = `฿${totalInc.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-      document.getElementById("totalExpense").textContent = `฿${totalExp.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-      
-      const balanceEl = document.getElementById("totalBalance");
-      balanceEl.textContent = `฿${balance.toLocaleString('th-TH', {minimumFractionDigits: 2})}`;
-      balanceEl.className = `text-2xl font-bold mt-2 ${balance >= 0 ? 'text-sky-600' : 'text-rose-600'}`;
-
-      transactionList.innerHTML = filtered.map(item => `
-        <tr class="hover:bg-slate-50">
-          <td class="p-3 text-slate-500">${item.date}</td>
-          <td class="p-3">
-            <span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.type === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-              ${item.type === 'income' ? 'รายรับ' : 'รายจ่าย'}
+      const generateHTML = (list) => list.map(t => `
+        <div class="bg-slate-700/40 p-3 rounded-2xl flex items-center justify-between border border-slate-700/50">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-sm ${t.type === 'income' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
+              ${t.type === 'income' ? '⇣' : '⇡'}
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-200">${t.title}</p>
+              <p class="text-[10px] text-slate-400">${t.date} • ${t.category}</p>
+            </div>
+          </div>
+          <div class="text-right flex items-center gap-2">
+            <span class="text-xs font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">
+              ${t.type === 'income' ? '+' : '-'}${t.amount.toLocaleString('th-TH', {minimumFractionDigits:2})}
             </span>
-          </td>
-          <td class="p-3 font-medium text-slate-700">${item.category}</td>
-          <td class="p-3 text-slate-600">${item.title}</td>
-          <td class="p-3 text-right font-semibold ${item.type === 'income' ? 'text-emerald-600' : 'text-rose-600'}">
-            ${item.type === 'income' ? '+' : '-'}${item.amount.toLocaleString('th-TH', {minimumFractionDigits: 2})}
-          </td>
-          <td class="p-3 text-center">
-            <button onclick="deleteTransaction('${item.id}')" class="text-slate-400 hover:text-rose-500 transition">🗑️</button>
-          </td>
-        </tr>
+            <button onclick="deleteTrans('${t.id}')" class="text-slate-500 hover:text-rose-400 text-xs">✕</button>
+          </div>
+        </div>
       `).join("");
+
+      document.getElementById("recentList").innerHTML = generateHTML(filtered.slice(0, 5));
+      document.getElementById("fullHistoryList").innerHTML = generateHTML(filtered);
     }
 
-    // ตัวกรองเวลา
-    filterType.addEventListener("change", () => {
-      const mode = filterType.value;
-      if (mode === "all") {
-        filterValueContainer.classList.add("hidden");
-      } else {
-        filterValueContainer.classList.remove("hidden");
-        filterDate.classList.toggle("hidden", mode !== "daily");
-        filterMonth.classList.toggle("hidden", mode !== "monthly");
-        filterYear.classList.toggle("hidden", mode !== "yearly");
-      }
-      renderUI();
-    });
+    // Initial setup
+    document.getElementById("transDate").value = new Date().toISOString().split("T")[0];
+    document.getElementById("filterType").addEventListener("change", renderUI);
+    activeUserLabel.textContent = `(${currentUser})`;
+    updateCategories();
+    updateFriendDropdown();
+    listenData();
 
-    filterDate.addEventListener("change", renderUI);
-    filterMonth.addEventListener("change", renderUI);
-    filterYear.addEventListener("input", renderUI);
-
-    // Register Service Worker สำหรับ PWA
+    // PWA Service Worker
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js');
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
     }
-
-    // สคริปต์จัดการปุ่มติดตั้ง PWA
-    let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installBtn.classList.remove('hidden');
-    });
-
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          installBtn.classList.add('hidden');
-        }
-        deferredPrompt = null;
-      }
-    });
   </script>
 </body>
 </html>
