@@ -31,7 +31,7 @@
     </button>
   </div>
 
-  <!-- 1. ส่วนเข้าสู่ระบบ (LOGIN SCREEN) -->
+  <!-- 1. หน้าเข้าสู่ระบบ (LOGIN SCREEN) -->
   <div id="loginScreen" class="max-w-md mx-auto my-16 bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-6">
     <div class="space-y-2">
       <h1 class="text-2xl font-bold text-amber-500">📊 MJ Cashflow System</h1>
@@ -49,10 +49,10 @@
     </button>
   </div>
 
-  <!-- 2. หน้าหลักหลังเข้าสู่ระบบ (MAIN DASHBOARD SPREADSHEET) -->
+  <!-- 2. หน้าหลัก (MAIN DASHBOARD SPREADSHEET) -->
   <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
     
-    <!-- Profile & Navigation Header -->
+    <!-- Profile Header (จะสลับเป็นของเพื่อนอัตโนมัติเมื่อกดส่อง) -->
     <div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
       <div class="flex items-center gap-3">
         <img id="userAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Profile">
@@ -92,8 +92,8 @@
         </div>
       </div>
 
-      <!-- Grid Content -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Grid Content (จะถูกล็อกด้วย pointer-events-none เมื่อส่องเพื่อน) -->
+      <div id="tableContainer" class="grid grid-cols-1 lg:grid-cols-12 gap-6 transition-all">
         <div class="lg:col-span-8 space-y-6">
           <!-- Income -->
           <div class="space-y-2">
@@ -148,7 +148,6 @@
                 <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
                 <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
               </div>
-              <!-- ช่องสรุปยอดรวมรายรับเสริม -->
               <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
                 <span class="text-emerald-500">รวมรายรับเสริม:</span>
                 <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
@@ -168,7 +167,6 @@
                 <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="ext-input bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
                 <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="ext-input bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
               </div>
-              <!-- ช่องสรุปยอดรวมรายจ่ายฝั่งไทย -->
               <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold">
                 <span class="text-rose-500">รวมรายจ่ายไทย:</span>
                 <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
@@ -289,7 +287,7 @@
           email: user.email
         });
 
-        loadMyProfile();
+        loadUserProfile(user.uid);
         loadUserData(user.uid);
       } else {
         currentUser = null;
@@ -299,16 +297,17 @@
     });
 
     // --- PROFILE MANAGEMENT ---
-    function loadMyProfile() {
-      if (!currentUser) return;
-      db.ref('users/' + currentUser.uid + '/profile').on('value', (snap) => {
+    function loadUserProfile(uid) {
+      db.ref('users/' + uid + '/profile').once('value').then((snap) => {
         const prof = snap.val() || {};
-        document.getElementById('userAvatar').src = prof.photoURL || currentUser.photoURL || 'https://via.placeholder.com/150';
-        document.getElementById('userNameDisplay').textContent = prof.displayName || currentUser.displayName || 'ผู้ใช้งาน';
+        document.getElementById('userAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
+        document.getElementById('userNameDisplay').textContent = prof.displayName || 'ผู้ใช้งาน';
         document.getElementById('userBioDisplay').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
         
-        document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
-        document.getElementById('editBio').value = prof.bio || '';
+        if (currentUser && uid === currentUser.uid) {
+          document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
+          document.getElementById('editBio').value = prof.bio || '';
+        }
       });
     }
 
@@ -325,6 +324,7 @@
         bio: newBio
       }).then(() => {
         closeProfileModal();
+        loadUserProfile(currentUser.uid);
         alert("บันทึกข้อมูลโปรไฟล์เรียบร้อยค่ะ!");
       });
     }
@@ -342,11 +342,14 @@
         viewMy.classList.remove('hidden');
         viewCom.classList.add('hidden');
         
-        viewingOtherUser = false;
-        document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
-        document.getElementById('tableActions').classList.remove('hidden');
-        setInputsDisabled(false);
-        loadUserData(currentUser.uid);
+        if (viewingOtherUser) {
+          viewingOtherUser = false;
+          loadUserProfile(currentUser.uid);
+          document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
+          document.getElementById('tableActions').classList.remove('hidden');
+          setInputsDisabled(false);
+          loadUserData(currentUser.uid);
+        }
       } else {
         btnCom.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
         btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
@@ -375,7 +378,7 @@
 
           const card = document.createElement('div');
           card.className = "bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-3 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500 transition shadow-sm";
-          card.onclick = () => inspectUserTable(uid, name);
+          card.onclick = () => inspectUserTable(uid);
 
           card.innerHTML = `
             <div class="flex items-center gap-3">
@@ -392,16 +395,18 @@
       });
     }
 
-    function inspectUserTable(uid, name) {
+    function inspectUserTable(uid) {
       viewingOtherUser = (uid !== currentUser.uid);
       
       switchTab('myTable');
-      document.getElementById('tableTitle').textContent = viewingOtherUser ? `🔍 กำลังส่องตารางของ: ${name} (โหมดอ่านอย่างเดียว 🔒)` : "จัดการตารางงบประมาณส่วนตัว";
-      
+      loadUserProfile(uid);
+
       if (viewingOtherUser) {
+        document.getElementById('tableTitle').textContent = `🔍 ตารางงบประมาณ (โหมดอ่านอย่างเดียว 🔒)`;
         document.getElementById('tableActions').classList.add('hidden');
         setInputsDisabled(true);
       } else {
+        document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
         document.getElementById('tableActions').classList.remove('hidden');
         setInputsDisabled(false);
       }
@@ -409,15 +414,31 @@
       loadUserData(uid);
     }
 
-    // ล็อก/ปลดล็อก Input ทุกช่อง
+    // ล็อก/ปลดล็อก Input และป้องกันการกดบนคอมและมือถือ
     function setInputsDisabled(disabled) {
+      const container = document.getElementById('tableContainer');
+      
+      if (disabled) {
+        container.classList.add('pointer-events-none', 'select-none'); // บล็อกสัมผัสบนมือถือ/เมาส์
+      } else {
+        container.classList.remove('pointer-events-none', 'select-none');
+      }
+
       document.querySelectorAll('#viewMyTable input').forEach(input => {
         input.disabled = disabled;
         input.readOnly = disabled;
-        if(disabled) {
-          input.classList.add('opacity-75', 'cursor-not-allowed');
+
+        if (disabled) {
+          // สไตล์คอม: กล่องสีเทา + ไอคอนห้ามพิมพ์
+          input.classList.add('bg-stone-200', 'dark:bg-stone-800', 'text-stone-400', 'dark:text-stone-500', 'cursor-not-allowed');
+          input.classList.remove('bg-white', 'dark:bg-stone-900', 'bg-transparent');
         } else {
-          input.classList.remove('opacity-75', 'cursor-not-allowed');
+          input.classList.remove('bg-stone-200', 'dark:bg-stone-800', 'text-stone-400', 'dark:text-stone-500', 'cursor-not-allowed');
+          if (input.classList.contains('row-est') || input.classList.contains('row-act') || input.classList.contains('ext-input')) {
+            input.classList.add('bg-white', 'dark:bg-stone-900');
+          } else {
+            input.classList.add('bg-transparent');
+          }
         }
       });
     }
@@ -426,11 +447,13 @@
     function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
       const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
       const isDisabled = viewingOtherUser ? 'disabled readonly' : '';
+      const disabledClass = viewingOtherUser ? 'bg-stone-200 dark:bg-stone-800 text-stone-400 dark:text-stone-500 cursor-not-allowed' : '';
+
       return `
         <div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
-          <input type="text" value="${data.name}" ${isDisabled} placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
-          <input type="number" step="0.01" value="${data.est}" ${isDisabled} oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
-          <input type="number" step="0.01" value="${data.act}" ${isDisabled} oninput="onDataChange()" class="row-act col-span-3 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+          <input type="text" value="${data.name}" ${isDisabled} placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 ${disabledClass} ${textColor} border-b border-stone-300 dark:border-stone-800 focus:border-amber-500 focus:outline-none px-1">
+          <input type="number" step="0.01" value="${data.est}" ${isDisabled} oninput="onDataChange()" class="row-est col-span-2 ${disabledClass || 'bg-white dark:bg-stone-900'} border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+          <input type="number" step="0.01" value="${data.act}" ${isDisabled} oninput="onDataChange()" class="row-act col-span-3 ${disabledClass || 'bg-white dark:bg-stone-900'} border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
           <span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
         </div>
       `;
