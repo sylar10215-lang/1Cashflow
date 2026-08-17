@@ -2,11 +2,11 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#f59e0b">
 <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2953/2953361.png">
-<title>MJ Cashflow & Social Budget System</title>
+<title>MJ Cashflow Community</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
 tailwind.config = {
@@ -20,8 +20,7 @@ darkMode: 'class',
 body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s; }
 </style>
 </head>
-<body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800">
-
+<body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800 pt-[env(safe-area-inset-top)]">
 <div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
 <div class="flex items-center gap-2">
 <span class="text-2xl">📊</span>
@@ -77,7 +76,7 @@ body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s
 👥 สมาชิกทั้งหมด
 </button>
 <button onclick="openProfileModal()" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
-⚙️ ตั้งค่าโปรไฟล์
+⚙️ ตั้งค่า
 </button>
 <button onclick="logout()" class="bg-rose-600/10 text-rose-500 hover:bg-rose-600 hover:text-white text-xs px-3 py-2 rounded-xl font-bold transition">
 ออกจากระบบ
@@ -141,7 +140,7 @@ body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s
 </div>
 <div id="extIncomeContainer" class="space-y-2 text-xs"></div>
 <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
-<span class="text-emerald-500">รวมรายรับเสริม:</span>
+<span class="text-emerald-500">รวมรายรับเสริม :</span>
 <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
 </div>
 </div>
@@ -153,7 +152,7 @@ body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s
 </div>
 <div id="extExpenseContainer" class="space-y-2 text-xs"></div>
 <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
-<span class="text-rose-500">รวมรายจ่ายไทย:</span>
+<span class="text-rose-500">รวมรายจ่ายไทย :</span>
 <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
 </div>
 </div>
@@ -164,11 +163,11 @@ body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s
 <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
 <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
 <div>
-<p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด (หลัก + เสริม)</p>
+<p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p>
 <p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-500">0</p>
 </div>
 <div>
-<p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด (หลัก + ไทย)</p>
+<p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p>
 <p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-500">0</p>
 </div>
 <div>
@@ -207,7 +206,7 @@ body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s
 
 <div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
 <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-<h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่าโปรไฟล์ส่วนตัว</h3>
+<h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่า</h3>
 <div class="space-y-3 text-xs">
 <div>
 <label class="block text-stone-500 dark:text-stone-400 mb-1">ชื่อที่แสดง (Display Name)</label>
