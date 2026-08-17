@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#f59e0b">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2953/2953361.png">
 <title>MJ Cashflow & Social Budget System</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -749,6 +752,14 @@ const grandTotalBalance = grandTotalIncome - grandTotalExpense; // คงเห�
 document.getElementById('finalTotalIncome').textContent = grandTotalIncome.toLocaleString('th-TH');
 document.getElementById('finalTotalExpense').textContent = grandTotalExpense.toLocaleString('th-TH');
 document.getElementById('finalBalance').textContent = grandTotalBalance.toLocaleString('th-TH');
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('PWA Service Worker registered!', reg))
+      .catch((err) => console.log('Service Worker registration failed:', err));
+  });
 }
 </script>
 </body>
