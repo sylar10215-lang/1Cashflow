@@ -3,26 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>MJ Cashflow & Budget System</title>
+  <title>MJ Cashflow & Social Budget System</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
   <style>
-    body { touch-action: manipulation; }
+    body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s; }
   </style>
 </head>
-<body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6">
+<body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800">
+
+  <!-- TOP BAR: Theme Toggle & Header -->
+  <div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
+    <div class="flex items-center gap-2">
+      <span class="text-2xl">📊</span>
+      <h1 class="text-lg font-bold text-amber-500">MJ Cashflow Community</h1>
+    </div>
+    <button onclick="toggleTheme()" class="p-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-amber-400 font-bold text-xs flex items-center gap-1 shadow">
+      <span id="themeIcon">☀️</span> <span id="themeText">โหมดสว่าง</span>
+    </button>
+  </div>
 
   <!-- 1. ส่วนเข้าสู่ระบบ (LOGIN SCREEN) -->
-  <div id="loginScreen" class="max-w-md mx-auto my-20 bg-[#232323] border border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-6">
+  <div id="loginScreen" class="max-w-md mx-auto my-16 bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-6 text-center shadow-2xl space-y-6">
     <div class="space-y-2">
-      <h1 class="text-2xl font-bold text-amber-400">📊 MJ Cashflow System</h1>
-      <p class="text-xs text-stone-400">กรุณาเข้าสู่ระบบเพื่อจัดการตารางรายรับ-รายจ่าย</p>
+      <h1 class="text-2xl font-bold text-amber-500">📊 MJ Cashflow System</h1>
+      <p class="text-xs text-stone-500 dark:text-stone-400">เข้าสู่ระบบเพื่อจัดการงบประมาณและแชร์ตารางร่วมกับเพื่อนๆ</p>
     </div>
     
-    <button id="googleLoginBtn" onclick="loginWithGoogle()" class="w-full bg-white text-stone-900 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:bg-stone-200 transition shadow-lg">
+    <button id="googleLoginBtn" onclick="loginWithGoogle()" class="w-full bg-stone-900 dark:bg-white text-white dark:text-stone-900 font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-3 hover:opacity-90 transition shadow-lg">
       <svg class="w-5 h-5" viewBox="0 0 24 24">
         <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
         <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -34,135 +50,170 @@
   </div>
 
   <!-- 2. หน้าหลักหลังเข้าสู่ระบบ (MAIN DASHBOARD SPREADSHEET) -->
-  <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-[#232323] border border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
+  <div id="mainDashboard" class="hidden max-w-6xl mx-auto bg-white dark:bg-[#232323] border border-stone-200 dark:border-stone-800 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-6">
     
-    <!-- Header Bar & Profile -->
-    <div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-800 pb-4">
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-xl sm:text-2xl font-bold text-amber-400">📊 ตารางงบประมาณรายเดือน</h1>
-          <span id="saveStatus" class="text-xs px-2 py-0.5 rounded bg-stone-800 text-stone-400">กำลังโหลด...</span>
+    <!-- Profile & Navigation Header -->
+    <div class="flex flex-wrap justify-between items-center gap-4 border-b border-stone-200 dark:border-stone-800 pb-4">
+      <div class="flex items-center gap-3">
+        <img id="userAvatar" src="https://via.placeholder.com/150" class="w-12 h-12 rounded-full border-2 border-amber-500 object-cover shadow" alt="Profile">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 id="userNameDisplay" class="font-bold text-base text-stone-800 dark:text-slate-100">...</h2>
+            <span id="saveStatus" class="text-[10px] px-2 py-0.5 rounded bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400">พร้อมใช้งาน</span>
+          </div>
+          <p id="userBioDisplay" class="text-xs text-stone-500 dark:text-stone-400 italic">ไม่มีคำอธิบายโปรไฟล์</p>
         </div>
-        <p id="userInfo" class="text-xs text-stone-400">ยินดีต้อนรับ MJ</p>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="addRow('income')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-2 rounded-xl font-bold transition">
-          + เพิ่มแถวรับ
+
+      <!-- Navigation Tabs -->
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="switchTab('myTable')" id="tabMyTable" class="bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition">
+          📋 ตารางของฉัน
         </button>
-        <button onclick="addRow('expense')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs px-3 py-2 rounded-xl font-bold transition">
-          + เพิ่มแถวจ่าย
+        <button onclick="switchTab('community')" id="tabCommunity" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
+          👥 สมาชิกทั้งหมด
         </button>
-        <button onclick="logout()" class="bg-stone-800 hover:bg-stone-700 text-stone-300 text-xs px-3 py-2 rounded-xl transition">
+        <button onclick="openProfileModal()" class="bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition">
+          ⚙️ ตั้งค่าโปรไฟล์
+        </button>
+        <button onclick="logout()" class="bg-rose-600/10 text-rose-500 hover:bg-rose-600 hover:text-white text-xs px-3 py-2 rounded-xl font-bold transition">
           ออกจากระบบ
         </button>
       </div>
     </div>
 
-    <!-- Main Sheet Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      
-      <!-- Left Column: ตารางหลัก (รายรับ + รายจ่าย) -->
-      <div class="lg:col-span-8 space-y-6">
-        
-        <!-- SECTION 1: รายรับรายเดือน -->
-        <div class="space-y-2">
-          <div class="grid grid-cols-12 text-xs font-bold text-emerald-400 pb-2 border-b border-stone-700">
-            <span class="col-span-5">รายรับรายเดือน</span>
-            <span class="col-span-2 text-right">ประมาณ</span>
-            <span class="col-span-3 text-right">รับจริง</span>
-            <span class="col-span-2 text-right">ผลต่าง</span>
-          </div>
-
-          <div id="incomeRows" class="space-y-2"></div>
-
-          <!-- ผลรวมรายรับ -->
-          <div class="grid grid-cols-12 text-sm font-bold text-emerald-400 pt-2 border-t border-stone-700">
-            <span class="col-span-5">ผลรวมรายรับ</span>
-            <span id="totIncEst" class="col-span-2 text-right">0</span>
-            <span id="totIncAct" class="col-span-3 text-right">0</span>
-            <span id="totIncDiff" class="col-span-2 text-right">0</span>
-          </div>
-        </div>
-
-        <!-- SECTION 2: รายจ่ายการทำงาน -->
-        <div class="space-y-2 pt-4">
-          <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pb-2 border-b border-stone-700">
-            <span class="col-span-5">รายจ่ายการทำงาน</span>
-            <span class="col-span-2 text-right">ประมาณ</span>
-            <span class="col-span-3 text-right">จ่ายจริง</span>
-            <span class="col-span-2 text-right">ผลต่าง</span>
-          </div>
-
-          <div id="expenseRows" class="space-y-2"></div>
-
-          <!-- ผลรวมรายจ่าย -->
-          <div class="grid grid-cols-12 text-sm font-bold text-amber-500 pt-2 border-t border-stone-700">
-            <span class="col-span-5">ผลรวมรายจ่าย</span>
-            <span id="totExpEst" class="col-span-2 text-right">0</span>
-            <span id="totExpAct" class="col-span-3 text-right">0</span>
-            <span id="totExpDiff" class="col-span-2 text-right">0</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- Right Column: ตารางเสริม (รายรับ/รายจ่ายฝั่งไทย) -->
-      <div class="lg:col-span-4 space-y-6 bg-[#1a1a1a] p-4 rounded-xl border border-stone-800">
-        <!-- รายรับ/ต่อเดือน Extra -->
-        <div class="space-y-2">
-          <h3 class="text-xs font-bold text-emerald-400 border-b border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center text-xs">
-              <input type="text" id="extIncName1" value="เงินเดือน" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
-              <input type="number" id="extIncVal1" value="28000" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
-            </div>
-            <div class="flex justify-between items-center text-xs">
-              <input type="text" id="extIncName2" value="บัตร Finnix" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
-              <input type="number" id="extIncVal2" value="500" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
-            </div>
-            <div class="flex justify-between items-center text-xs">
-              <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-stone-300 w-3/5 focus:outline-none">
-              <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-400 font-bold focus:outline-none">
-            </div>
-          </div>
-        </div>
-
-        <!-- รายจ่ายฝั่งไทย Extra -->
-        <div class="space-y-2 pt-4 border-t border-stone-800">
-          <h3 class="text-xs font-bold text-rose-400 border-b border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
-          <div class="space-y-2">
-            <div class="flex justify-between items-center text-xs">
-              <input type="text" id="extExpName1" value="ให้ครอบครัว" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-rose-300 w-3/5 focus:outline-none">
-              <input type="number" id="extExpVal1" value="16000" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-400 font-bold focus:outline-none">
-            </div>
-            <div class="flex justify-between items-center text-xs">
-              <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="bg-transparent border-b border-stone-800 text-rose-300 w-3/5 focus:outline-none">
-              <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="bg-stone-900 border border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-400 font-bold focus:outline-none">
-            </div>
-          </div>
+    <!-- VIEW 1: MY TABLE & EDITING -->
+    <div id="viewMyTable" class="space-y-6">
+      <div class="flex justify-between items-center">
+        <h3 id="tableTitle" class="text-sm font-bold text-amber-500">จัดการตารางงบประมาณส่วนตัว</h3>
+        <div id="tableActions" class="flex gap-2">
+          <button onclick="addRow('income')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">+ เพิ่มรับ</button>
+          <button onclick="addRow('expense')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs px-3 py-1.5 rounded-lg font-bold transition">+ เพิ่มจ่าย</button>
         </div>
       </div>
 
+      <!-- Grid Content -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-8 space-y-6">
+          <!-- Income -->
+          <div class="space-y-2">
+            <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-2">
+              <span class="col-span-5">รายรับรายเดือน</span>
+              <span class="col-span-2 text-right">ประมาณ</span>
+              <span class="col-span-3 text-right">รับจริง</span>
+              <span class="col-span-2 text-right">ผลต่าง</span>
+            </div>
+            <div id="incomeRows" class="space-y-2"></div>
+            <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2 border-t border-stone-200 dark:border-stone-700">
+              <span class="col-span-5">ผลรวมรายรับ</span>
+              <span id="totIncEst" class="col-span-2 text-right">0</span>
+              <span id="totIncAct" class="col-span-3 text-right">0</span>
+              <span id="totIncDiff" class="col-span-2 text-right">0</span>
+            </div>
+          </div>
+
+          <!-- Expense -->
+          <div class="space-y-2 pt-4">
+            <div class="grid grid-cols-12 text-xs font-bold text-amber-500 border-b border-stone-200 dark:border-stone-700 pb-2">
+              <span class="col-span-5">รายจ่ายการทำงาน</span>
+              <span class="col-span-2 text-right">ประมาณ</span>
+              <span class="col-span-3 text-right">จ่ายจริง</span>
+              <span class="col-span-2 text-right">ผลต่าง</span>
+            </div>
+            <div id="expenseRows" class="space-y-2"></div>
+            <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2 border-t border-stone-200 dark:border-stone-700">
+              <span class="col-span-5">ผลรวมรายจ่าย</span>
+              <span id="totExpEst" class="col-span-2 text-right">0</span>
+              <span id="totExpAct" class="col-span-3 text-right">0</span>
+              <span id="totExpDiff" class="col-span-2 text-right">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Extra Table -->
+        <div class="lg:col-span-4 space-y-6 bg-stone-50 dark:bg-[#1a1a1a] p-4 rounded-xl border border-stone-200 dark:border-stone-800">
+          <div class="space-y-2">
+            <h3 class="text-xs font-bold text-emerald-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายรับ/ต่อเดือน</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center">
+                <input type="text" id="extIncName1" value="เงินเดือน" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extIncVal1" value="28000" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
+              </div>
+              <div class="flex justify-between items-center">
+                <input type="text" id="extIncName2" value="บัตร Finnix" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extIncVal2" value="500" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
+              </div>
+              <div class="flex justify-between items-center">
+                <input type="text" id="extIncName3" value="บัตร Promise" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extIncVal3" value="400" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-emerald-500 font-bold focus:outline-none">
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-4 border-t border-stone-200 dark:border-stone-800">
+            <h3 class="text-xs font-bold text-rose-500 border-b border-stone-200 dark:border-stone-700 pb-1">รายจ่ายฝั่งไทย</h3>
+            <div class="space-y-2 text-xs">
+              <div class="flex justify-between items-center">
+                <input type="text" id="extExpName1" value="ให้ครอบครัว" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extExpVal1" value="16000" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
+              </div>
+              <div class="flex justify-between items-center">
+                <input type="text" id="extExpName2" value="ค่าเลี้ยงบุตร***" oninput="onDataChange()" class="bg-transparent border-b border-stone-300 dark:border-stone-800 w-3/5 focus:outline-none">
+                <input type="number" id="extExpVal2" value="800" oninput="onDataChange()" class="bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 text-rose-500 font-bold focus:outline-none">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
+        <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
+          <div>
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับ</p>
+            <p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-500">0</p>
+          </div>
+          <div>
+            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่าย</p>
+            <p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-500">0</p>
+          </div>
+          <div>
+            <p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือ</p>
+            <p id="finalBalance" class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">0</p>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <!-- Bottom Summary Box (กล่องสรุปสีทอง) -->
-    <div class="bg-stone-950 border border-amber-500/40 rounded-2xl p-4 sm:p-6 text-center shadow-xl">
-      <div class="grid grid-cols-3 divide-x divide-stone-800">
-        <div>
-          <p class="text-xs text-stone-400 font-semibold mb-1">ผลรวมรายรับ</p>
-          <p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-400">0</p>
-        </div>
-        <div>
-          <p class="text-xs text-stone-400 font-semibold mb-1">ผลรวมรายจ่าย</p>
-          <p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-400">0</p>
-        </div>
-        <div>
-          <p class="text-xs text-amber-400 font-semibold mb-1">คงเหลือ</p>
-          <p id="finalBalance" class="text-xl sm:text-4xl font-black text-amber-400 tracking-tight">0</p>
-        </div>
+    <!-- VIEW 2: COMMUNITY & MEMBERS LIST -->
+    <div id="viewCommunity" class="hidden space-y-4">
+      <h3 class="text-sm font-bold text-amber-500">👥 สมาชิกทั้งหมดในระบบ (คลิกที่ชื่อเพื่อส่องตารางการเงิน)</h3>
+      <div id="memberList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <!-- รายชื่อสมาชิกจะแสดงที่นี่ -->
       </div>
     </div>
 
+  </div>
+
+  <!-- MODAL: SETTINGS & EDIT PROFILE -->
+  <div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+      <h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่าโปรไฟล์ส่วนตัว</h3>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-stone-500 dark:text-stone-400 mb-1">ชื่อที่แสดง (Display Name)</label>
+          <input type="text" id="editDisplayName" class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-stone-500 dark:text-stone-400 mb-1">คำอธิบายโปรไฟล์ (Bio)</label>
+          <textarea id="editBio" rows="3" placeholder="เขียนสโลแกนหรือการเงินสไตล์คุณ..." class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeProfileModal()" class="px-4 py-2 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs rounded-xl font-bold">ยกเลิก</button>
+        <button onclick="saveProfileSettings()" class="px-4 py-2 bg-amber-500 text-stone-900 text-xs rounded-xl font-bold">บันทึกเปลี่ยนแปลง</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -177,19 +228,18 @@
       appId: "1:841200170286:web:e418345aea281ca1eb36bf"
     };
 
-    if (!firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
-    }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.database();
+    
     let currentUser = null;
     let saveTimeout = null;
+    let viewingOtherUser = false;
 
     // Default Values
     const defaultIncomes = [
       { name: "เงินเดือน (สุทธิ)", est: 11200, act: 11200 },
       { name: "รายรับอื่นๆ A", est: 1100, act: 1100 },
-      { name: "รายรับอื่นๆ ฝ้าย", est: 0, act: 0 },
       { name: "รายรับอื่นๆ", est: 0, act: 0 }
     ];
 
@@ -198,28 +248,41 @@
       { name: "ค่าของใช้ในห้อง (7 วัน)", est: 350, act: 350 },
       { name: "ค่าเดินทาง (หาร 2 คน)", est: 1000, act: 1000 },
       { name: "ค่าของใช้ (ต่อเดือน)", est: 500, act: 500 },
-      { name: "ค่าเน็ตที่พัก (ที่ทำงาน)", est: 250, act: 249 },
-      { name: "อื่นๆ ค่าเน็ตรายเดือนทรู", est: 200, act: 191.53 },
       { name: "เงินออม (บัญชีออมสิน)", est: 500, act: 500 }
     ];
+
+    // --- THEME TOGGLE ---
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      document.getElementById('themeIcon').textContent = isDark ? '☀️' : '🌙';
+      document.getElementById('themeText').textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
+    }
+    // เริ่มต้นที่โหมดมืด
+    document.documentElement.classList.add('dark');
 
     // --- AUTHENTICATION ---
     function loginWithGoogle() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch((error) => alert("ล็อกอินไม่สำเร็จ: " + error.message));
+      auth.signInWithPopup(provider).catch((err) => alert("ล็อกอินไม่สำเร็จ: " + err.message));
     }
 
-    function logout() {
-      auth.signOut();
-    }
+    function logout() { auth.signOut(); }
 
     auth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('mainDashboard').classList.remove('hidden');
-        document.getElementById('userInfo').textContent = `ผู้ใช้งาน: ${user.displayName || user.email}`;
-        loadUserData();
+        
+        // อัปเดตข้อมูลผู้ใช้เบื้องต้นลงฐานข้อมูล
+        db.ref('users/' + user.uid + '/profile').update({
+          displayName: user.displayName || 'ผู้ใช้งาน MJ',
+          photoURL: user.photoURL || 'https://via.placeholder.com/150',
+          email: user.email
+        });
+
+        loadMyProfile();
+        loadUserData(user.uid);
       } else {
         currentUser = null;
         document.getElementById('loginScreen').classList.remove('hidden');
@@ -227,20 +290,139 @@
       }
     });
 
-    // --- UI HELPERS ---
+    // --- PROFILE MANAGEMENT ---
+    function loadMyProfile() {
+      if (!currentUser) return;
+      db.ref('users/' + currentUser.uid + '/profile').on('value', (snap) => {
+        const prof = snap.val() || {};
+        document.getElementById('userAvatar').src = prof.photoURL || currentUser.photoURL || 'https://via.placeholder.com/150';
+        document.getElementById('userNameDisplay').textContent = prof.displayName || currentUser.displayName || 'ผู้ใช้งาน';
+        document.getElementById('userBioDisplay').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
+        
+        document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
+        document.getElementById('editBio').value = prof.bio || '';
+      });
+    }
+
+    function openProfileModal() { document.getElementById('profileModal').classList.remove('hidden'); }
+    function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); }
+
+    function saveProfileSettings() {
+      if (!currentUser) return;
+      const newName = document.getElementById('editDisplayName').value;
+      const newBio = document.getElementById('editBio').value;
+
+      db.ref('users/' + currentUser.uid + '/profile').update({
+        displayName: newName,
+        bio: newBio
+      }).then(() => {
+        closeProfileModal();
+        alert("บันทึกข้อมูลโปรไฟล์เรียบร้อยค่ะ!");
+      });
+    }
+
+    // --- NAVIGATION & TABS ---
+    function switchTab(tab) {
+      const btnMy = document.getElementById('tabMyTable');
+      const btnCom = document.getElementById('tabCommunity');
+      const viewMy = document.getElementById('viewMyTable');
+      const viewCom = document.getElementById('viewCommunity');
+
+      if (tab === 'myTable') {
+        btnMy.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
+        btnCom.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
+        viewMy.classList.remove('hidden');
+        viewCom.classList.add('hidden');
+        
+        // สลับกลับมาดูตารางตัวเอง
+        viewingOtherUser = false;
+        document.getElementById('tableTitle').textContent = "จัดการตารางงบประมาณส่วนตัว";
+        document.getElementById('tableActions').classList.remove('hidden');
+        setInputsDisabled(false);
+        loadUserData(currentUser.uid);
+      } else {
+        btnCom.className = "bg-amber-500 text-stone-900 text-xs px-3 py-2 rounded-xl font-bold transition";
+        btnMy.className = "bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs px-3 py-2 rounded-xl font-bold transition";
+        viewCom.classList.remove('hidden');
+        viewMy.classList.add('hidden');
+        loadCommunityMembers();
+      }
+    }
+
+    // --- COMMUNITY & INSPECT OTHER USERS ---
+    function loadCommunityMembers() {
+      const memberListEl = document.getElementById('memberList');
+      memberListEl.innerHTML = '<p class="text-xs text-stone-400">กำลังโหลดรายชื่อสมาชิก...</p>';
+
+      db.ref('users').once('value').then((snap) => {
+        const users = snap.val() || {};
+        memberListEl.innerHTML = '';
+
+        Object.keys(users).forEach(uid => {
+          const u = users[uid];
+          const prof = u.profile || {};
+          const name = prof.displayName || 'ผู้ใช้ไม่ระบุชื่อ';
+          const avatar = prof.photoURL || 'https://via.placeholder.com/150';
+          const bio = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
+          const isMe = currentUser && uid === currentUser.uid;
+
+          const card = document.createElement('div');
+          card.className = "bg-stone-50 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 p-3 rounded-xl flex items-center justify-between cursor-pointer hover:border-amber-500 transition shadow-sm";
+          card.onclick = () => inspectUserTable(uid, name);
+
+          card.innerHTML = `
+            <div class="flex items-center gap-3">
+              <img src="${avatar}" class="w-10 h-10 rounded-full border border-amber-500 object-cover">
+              <div>
+                <p class="text-xs font-bold text-stone-800 dark:text-slate-100">${name} ${isMe ? '<span class="text-[10px] text-amber-500">(คุณ)</span>' : ''}</p>
+                <p class="text-[10px] text-stone-500 dark:text-stone-400 line-clamp-1">${bio}</p>
+              </div>
+            </div>
+            <span class="text-xs text-amber-500 font-bold">ส่องตาราง ➔</span>
+          `;
+          memberListEl.appendChild(card);
+        });
+      });
+    }
+
+    function inspectUserTable(uid, name) {
+      viewingOtherUser = (uid !== currentUser.uid);
+      
+      switchTab('myTable');
+      document.getElementById('tableTitle').textContent = viewingOtherUser ? `🔍 กำลังส่องตารางของ: ${name} (อ่านได้อย่างเดียว)` : "จัดการตารางงบประมาณส่วนตัว";
+      
+      if (viewingOtherUser) {
+        document.getElementById('tableActions').classList.add('hidden');
+        setInputsDisabled(true);
+      } else {
+        document.getElementById('tableActions').classList.remove('hidden');
+        setInputsDisabled(false);
+      }
+
+      loadUserData(uid);
+    }
+
+    function setInputsDisabled(disabled) {
+      document.querySelectorAll('#viewMyTable input').forEach(input => {
+        input.disabled = disabled;
+      });
+    }
+
+    // --- SPREADSHEET RENDER & CALCULATIONS ---
     function createRowHTML(type, data = { name: '', est: 0, act: 0 }) {
-      const textColor = type === 'income' ? 'text-emerald-400' : 'text-amber-400';
+      const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
       return `
         <div class="grid grid-cols-12 gap-1 items-center text-xs ${type}-row">
-          <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 bg-transparent border-b border-stone-800 ${textColor} focus:border-amber-400 focus:outline-none px-1">
-          <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-stone-900 border border-stone-800 rounded text-right px-1 py-1 text-stone-200 focus:outline-none">
-          <input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-stone-900 border border-stone-800 rounded text-right px-1 py-1 text-stone-200 focus:outline-none">
+          <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name col-span-5 bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
+          <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
+          <input type="number" step="0.01" value="${data.act}" oninput="onDataChange()" class="row-act col-span-3 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
           <span class="row-diff col-span-2 text-right text-stone-400 font-mono">0</span>
         </div>
       `;
     }
 
     function addRow(type) {
+      if (viewingOtherUser) return;
       const box = document.getElementById(type === 'income' ? 'incomeRows' : 'expenseRows');
       box.insertAdjacentHTML('beforeend', createRowHTML(type));
       onDataChange();
@@ -248,28 +430,18 @@
 
     function onDataChange() {
       calculate();
-      triggerAutoSave();
+      if (!viewingOtherUser) triggerAutoSave();
     }
 
-    function updateSaveStatus(text, colorClass) {
-      const statusEl = document.getElementById('saveStatus');
-      statusEl.textContent = text;
-      statusEl.className = `text-xs px-2 py-0.5 rounded ${colorClass}`;
-    }
-
-    // --- SAVE & LOAD FROM FIREBASE REALTIME DATABASE ---
     function triggerAutoSave() {
-      if (!currentUser) return;
+      if (!currentUser || viewingOtherUser) return;
       updateSaveStatus("กำลังบันทึก...", "bg-amber-900/50 text-amber-400");
-      
       clearTimeout(saveTimeout);
-      saveTimeout = setTimeout(() => {
-        saveUserData();
-      }, 1000); // ดีเลย์ 1 วินาทีหลังหยุดพิมพ์แล้วเซฟอัตโนมัติ
+      saveTimeout = setTimeout(() => saveUserData(), 1000);
     }
 
     function saveUserData() {
-      if (!currentUser) return;
+      if (!currentUser || viewingOtherUser) return;
 
       const incomes = [];
       document.querySelectorAll('.income-row').forEach(row => {
@@ -297,25 +469,20 @@
         exp2: { name: document.getElementById('extExpName2').value, val: parseFloat(document.getElementById('extExpVal2').value) || 0 }
       };
 
-      db.ref('users/' + currentUser.uid).set({
-        incomes,
-        expenses,
-        extras,
-        updatedAt: Date.now()
+      db.ref('users/' + currentUser.uid + '/data').set({
+        incomes, expenses, extras, updatedAt: Date.now()
       }).then(() => {
         updateSaveStatus("บันทึกแล้ว ✓", "bg-emerald-900/50 text-emerald-400");
-      }).catch(err => {
+      }).catch(() => {
         updateSaveStatus("บันทึกไม่สำเร็จ", "bg-rose-900/50 text-rose-400");
       });
     }
 
-    function loadUserData() {
-      if (!currentUser) return;
-      updateSaveStatus("กำลังดึงข้อมูล...", "bg-stone-800 text-stone-400");
+    function loadUserData(targetUid) {
+      updateSaveStatus("กำลังโหลด...", "bg-stone-800 text-stone-400");
 
-      db.ref('users/' + currentUser.uid).once('value').then((snapshot) => {
+      db.ref('users/' + targetUid + '/data').once('value').then((snapshot) => {
         const data = snapshot.val();
-        
         const incBox = document.getElementById('incomeRows');
         const expBox = document.getElementById('expenseRows');
 
@@ -331,27 +498,31 @@
             if(data.extras.exp2) { document.getElementById('extExpName2').value = data.extras.exp2.name; document.getElementById('extExpVal2').value = data.extras.exp2.val; }
           }
         } else {
-          // ถ้ายังไม่มีข้อมูลในระบบ ให้ใช้ค่าเริ่มต้น
           incBox.innerHTML = defaultIncomes.map(item => createRowHTML('income', item)).join('');
           expBox.innerHTML = defaultExpenses.map(item => createRowHTML('expense', item)).join('');
         }
+
+        if (viewingOtherUser) setInputsDisabled(true);
 
         calculate();
         updateSaveStatus("พร้อมใช้งาน", "bg-emerald-900/50 text-emerald-400");
       });
     }
 
-    // --- CALCULATE LOGIC ---
+    function updateSaveStatus(text, colorClass) {
+      const statusEl = document.getElementById('saveStatus');
+      statusEl.textContent = text;
+      statusEl.className = `text-[10px] px-2 py-0.5 rounded ${colorClass}`;
+    }
+
     function calculate() {
       let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
       document.querySelectorAll('.income-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
         const act = parseFloat(row.querySelector('.row-act').value) || 0;
         const diff = est - act;
-        row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
-        totIncEst += est;
-        totIncAct += act;
-        totIncDiff += diff;
+        row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
+        totIncEst += est; totIncAct += act; totIncDiff += diff;
       });
 
       document.getElementById('totIncEst').textContent = totIncEst.toLocaleString('th-TH');
@@ -363,10 +534,8 @@
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
         const act = parseFloat(row.querySelector('.row-act').value) || 0;
         const diff = est - act;
-        row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
-        totExpEst += est;
-        totExpAct += act;
-        totExpDiff += diff;
+        row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
+        totExpEst += est; totExpAct += act; totExpDiff += diff;
       });
 
       document.getElementById('totExpEst').textContent = totExpEst.toLocaleString('th-TH');
@@ -377,9 +546,9 @@
       const finalExp = totExpAct;
       const finalBal = finalInc - finalExp;
 
-      document.getElementById('finalTotalIncome').textContent = finalInc.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
-      document.getElementById('finalTotalExpense').textContent = finalExp.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
-      document.getElementById('finalBalance').textContent = finalBal.toLocaleString('th-TH', {minimumFractionDigits: 0, maximumFractionDigits: 2});
+      document.getElementById('finalTotalIncome').textContent = finalInc.toLocaleString('th-TH');
+      document.getElementById('finalTotalExpense').textContent = finalExp.toLocaleString('th-TH');
+      document.getElementById('finalBalance').textContent = finalBal.toLocaleString('th-TH');
     }
   </script>
 </body>
