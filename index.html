@@ -6,6 +6,8 @@
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#f59e0b">
 <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2953/2953361.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>MJ Cashflow Community</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -20,8 +22,7 @@ darkMode: 'class',
 body { touch-action: manipulation; transition: background-color 0.3s, color 0.3s; }
 </style>
 </head>
-<body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800 pt-[env(safe-area-inset-top)]">
-<div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
+<body class="bg-stone-900 text-slate-100 min-h-screen font-sans p-2 sm:p-6 dark:bg-stone-900 dark:text-slate-100 bg-stone-100 text-stone-800" style="padding-top: max(20px, env(safe-area-inset-top));"><div class="max-w-6xl mx-auto flex justify-between items-center mb-4 px-2">
 <div class="flex items-center gap-2">
 <span class="text-2xl">📊</span>
 <h1 class="text-lg font-bold text-amber-500">MJ Cashflow Community</h1>
