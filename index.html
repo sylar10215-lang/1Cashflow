@@ -215,20 +215,32 @@
   </div>
 
   <!-- MODAL: SETTINGS & EDIT PROFILE -->
-  <div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 max-w-md w-full space-y-4 shadow-2xl">
-      <h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่าโปรไฟล์ส่วนตัว</h3>
-      <div class="space-y-3 text-xs">
+  <div id="profileModal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
+    <div class="bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800 rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl my-8 max-h-[85vh] overflow-y-auto">
+      <h3 class="text-lg font-bold text-amber-500">⚙️ ตั้งค่าโปรไฟล์และสิทธิ์การมองเห็น</h3>
+      <div class="space-y-4 text-xs">
         <div>
           <label class="block text-stone-500 dark:text-stone-400 mb-1">ชื่อที่แสดง (Display Name)</label>
           <input type="text" id="editDisplayName" class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none">
         </div>
         <div>
           <label class="block text-stone-500 dark:text-stone-400 mb-1">คำอธิบายโปรไฟล์ (Bio)</label>
-          <textarea id="editBio" rows="3" placeholder="เขียนสโลแกนหรือการเงินสไตล์คุณ..." class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none"></textarea>
+          <textarea id="editBio" rows="2" placeholder="เขียนสโลแกนหรือการเงินสไตล์คุณ..." class="w-full bg-stone-100 dark:bg-stone-800 border border-stone-300 dark:border-stone-700 rounded-lg p-2 focus:outline-none"></textarea>
+        </div>
+
+        <!-- เลือกสิทธิ์รายบุคคล -->
+        <div class="pt-2 border-t border-stone-200 dark:border-stone-800 space-y-2">
+          <div>
+            <p class="font-bold text-stone-800 dark:text-slate-200 text-sm">🔒 เลือกอนุญาตให้เพื่อนคนไหนส่องตารางได้บ้าง</p>
+            <p class="text-[10px] text-stone-400">ปิดสวิตช์รายชื่อเพื่อนที่ไม่ต้องการให้เข้ามาดูตารางของคุณ</p>
+          </div>
+          <div id="accessControlList" class="space-y-2 max-h-48 overflow-y-auto pr-1 bg-stone-50 dark:bg-stone-950 p-2 rounded-xl border border-stone-200 dark:border-stone-800">
+            <p class="text-stone-400 text-xs text-center py-2">กำลังโหลดรายชื่อสมาชิก...</p>
+          </div>
         </div>
       </div>
-      <div class="flex justify-end gap-2 pt-2">
+
+      <div class="flex justify-end gap-2 pt-3 border-t border-stone-200 dark:border-stone-800">
         <button onclick="closeProfileModal()" class="px-4 py-2 bg-stone-200 dark:bg-stone-800 text-stone-700 dark:text-stone-300 text-xs rounded-xl font-bold">ยกเลิก</button>
         <button onclick="saveProfileSettings()" class="px-4 py-2 bg-amber-500 text-stone-900 text-xs rounded-xl font-bold">บันทึกเปลี่ยนแปลง</button>
       </div>
@@ -316,14 +328,16 @@
         document.getElementById('loginScreen').classList.add('hidden');
         document.getElementById('mainDashboard').classList.remove('hidden');
         
-        db.ref('users/' + user.uid + '/profile').update({
-          displayName: user.displayName || 'ผู้ใช้งาน MJ',
-          photoURL: user.photoURL || 'https://via.placeholder.com/150',
-          email: user.email
+        db.ref('users/' + user.uid + '/profile').once('value').then(snap => {
+          const prof = snap.val() || {};
+          db.ref('users/' + user.uid + '/profile').update({
+            displayName: prof.displayName || user.displayName || 'ผู้ใช้งาน MJ',
+            photoURL: prof.photoURL || user.photoURL || 'https://via.placeholder.com/150',
+            email: user.email
+          });
+          loadUserProfile(user.uid);
+          loadUserData(user.uid);
         });
-
-        loadUserProfile(user.uid);
-        loadUserData(user.uid);
       } else {
         currentUser = null;
         document.getElementById('loginScreen').classList.remove('hidden');
@@ -372,6 +386,49 @@
         
         document.getElementById('editDisplayName').value = prof.displayName || currentUser.displayName || '';
         document.getElementById('editBio').value = prof.bio || '';
+        
+        loadAccessControlCheckboxes(prof.allowedViewers || {});
+      });
+    }
+
+    function loadAccessControlCheckboxes(allowedViewers) {
+      const container = document.getElementById('accessControlList');
+      container.innerHTML = '<p class="text-stone-400 text-xs text-center py-2">กำลังโหลดรายชื่อสมาชิก...</p>';
+
+      db.ref('users').once('value').then(snap => {
+        const users = snap.val() || {};
+        container.innerHTML = '';
+
+        const otherUsers = Object.keys(users).filter(uid => uid !== currentUser.uid);
+
+        if (otherUsers.length === 0) {
+          container.innerHTML = '<p class="text-stone-400 text-xs text-center py-2">ยังไม่มีสมาชิกอื่นในระบบ</p>';
+          return;
+        }
+
+        otherUsers.forEach(uid => {
+          const u = users[uid];
+          const prof = u.profile || {};
+          const name = prof.displayName || 'ผู้ใช้ไม่ระบุชื่อ';
+          const avatar = prof.photoURL || 'https://via.placeholder.com/150';
+          
+          // ค่าเริ่มต้นถ้ายังไม่เคยเซฟ ให้ถือว่าอนุญาตให้ดูได้ (true) ยกเว้นถูกปิดไว้
+          const isAllowed = allowedViewers[uid] !== undefined ? allowedViewers[uid] : true;
+
+          const row = document.createElement('div');
+          row.className = "flex items-center justify-between p-2 rounded-lg bg-white dark:bg-stone-900 border border-stone-200 dark:border-stone-800";
+          row.innerHTML = `
+            <div class="flex items-center gap-2">
+              <img src="${avatar}" class="w-7 h-7 rounded-full border border-amber-500 object-cover">
+              <span class="text-xs font-bold text-stone-800 dark:text-slate-200">${name}</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" data-uid="${uid}" class="viewer-checkbox sr-only peer" ${isAllowed ? 'checked' : ''}>
+              <div class="w-8 h-4 bg-stone-300 peer-focus:outline-none rounded-full peer dark:bg-stone-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-amber-500"></div>
+            </label>
+          `;
+          container.appendChild(row);
+        });
       });
     }
 
@@ -383,13 +440,20 @@
       const newName = document.getElementById('editDisplayName').value;
       const newBio = document.getElementById('editBio').value;
 
+      const allowedViewers = {};
+      document.querySelectorAll('.viewer-checkbox').forEach(chk => {
+        const uid = chk.getAttribute('data-uid');
+        allowedViewers[uid] = chk.checked;
+      });
+
       db.ref('users/' + currentUser.uid + '/profile').update({
         displayName: newName,
-        bio: newBio
+        bio: newBio,
+        allowedViewers: allowedViewers
       }).then(() => {
         closeProfileModal();
         loadUserProfile(currentUser.uid);
-        alert("บันทึกข้อมูลโปรไฟล์เรียบร้อยค่ะ!");
+        alert("บันทึกข้อมูลโปรไฟล์และสิทธิ์การมองเห็นเรียบร้อยค่ะ!");
       });
     }
 
@@ -455,12 +519,28 @@
         const user = snap.val() || {};
         const prof = user.profile || {};
         const data = user.data || {};
+        const allowedViewers = prof.allowedViewers || {};
+        const isMe = currentUser && uid === currentUser.uid;
 
         document.getElementById('friendAvatar').src = prof.photoURL || 'https://via.placeholder.com/150';
         document.getElementById('friendName').textContent = prof.displayName || 'ผู้ใช้งาน';
         document.getElementById('friendBio').textContent = prof.bio || 'ไม่มีคำอธิบายโปรไฟล์';
 
-        renderFriendTableText(data);
+        // ตรวจสอบสิทธิ์ว่าเจ้าของตารางอนุญาตให้เราดูไหม (ถ้าเป็นเราเองดูได้เสมอ)
+        const isAllowedForMe = isMe || (allowedViewers[currentUser.uid] !== false);
+
+        if (!isAllowedForMe) {
+          document.getElementById('friendTableContent').innerHTML = `
+            <div class="p-12 text-center space-y-3">
+              <span class="text-4xl">🔒</span>
+              <h3 class="text-base font-bold text-amber-500">ไม่มีสิทธิ์เข้าชมตารางนี้</h3>
+              <p class="text-xs text-stone-400">เจ้าของบัญชีนี้ไม่ได้อนุญาตให้คุณเข้าดูตารางงบประมาณ</p>
+            </div>
+          `;
+        } else {
+          renderFriendTableText(data);
+        }
+
         document.getElementById('friendTableModal').classList.remove('hidden');
       });
     }
