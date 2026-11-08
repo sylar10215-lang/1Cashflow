@@ -152,16 +152,13 @@
         </div>
       </div>
 
-      <!-- Summary Box (สรุปแยกสกุลเงิน + รวมเป็นเงินไทย) -->
+      <!-- Summary Box -->
       <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 shadow-xl space-y-4">
-        
-        <!-- สรุปแยกตามสกุลเงิน -->
         <div>
           <h4 class="text-xs font-bold text-amber-500 border-b border-stone-300 dark:border-stone-800 pb-2 mb-3">📌 สรุปยอดแยกตามสกุลเงิน</h4>
           <div id="currencyBreakdown" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
         </div>
 
-        <!-- สรุปรวมแปลงเป็นเงินบาท -->
         <div class="pt-3 border-t-2 border-dashed border-stone-300 dark:border-stone-800">
           <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1 text-center">🇹🇭 ผลรวมสุทธิ (แปลงเป็นเงินบาท THB ทั้งหมด)</p>
           <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800 text-center">
@@ -254,15 +251,16 @@
 
     // อัตราแลกเปลี่ยน (อิงเรทตลาด / Bitkub USDT)
     const EXCHANGE_RATES = {
-      THB: 1.0,      // บาท
-      LKR: 0.101,    // รูปีศรีลังกา (~0.101 บาท)
-      USD: 33.50     // ดอลลาร์สหรัฐ (~33.50 บาท จาก Bitkub USDT)
+      THB: 1.0,
+      LKR: 0.101,
+      USD: 33.50
     };
 
+    // ตัวเลือกแสดงเฉพาะตอนกดเปิดเลือกเรทเงิน
     const CURRENCY_OPTIONS = [
-      { code: 'THB', symbol: '฿', label: 'THB (฿1.00)' },
-      { code: 'LKR', symbol: 'Rs', label: 'LKR (Rs ≈ 0.101฿)' },
-      { code: 'USD', symbol: '$', label: 'USD ($ ≈ 33.50฿)' }
+      { code: 'THB', symbol: '฿', label: '฿ (THB)' },
+      { code: 'LKR', symbol: 'Rs', label: 'Rs (LKR - เรท 0.101฿)' },
+      { code: 'USD', symbol: '$', label: '$ (USD - เรท 33.50฿)' }
     ];
 
     // Default Data
@@ -593,7 +591,7 @@
     // --- SPREADSHEET RENDER & EDITING LOGIC ---
     function renderCurrencyOptions(selectedCur) {
       return CURRENCY_OPTIONS.map(opt => `
-        <option value="${opt.code}" ${selectedCur === opt.code ? 'selected' : ''}>${opt.label}</option>
+        <option value="${opt.code}" ${selectedCur === opt.code ? 'selected' : ''}>${opt.symbol} (${opt.code})</option>
       `).join('');
     }
 
@@ -605,8 +603,8 @@
           <div class="col-span-5 flex items-center gap-1">
             <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
             <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name w-full bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
-            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1 py-0.5 outline-none font-bold text-amber-500 border border-stone-300 dark:border-stone-700">
-              ${renderCurrencyOptions(cur)}
+            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1.5 py-0.5 outline-none font-bold text-amber-500 border border-stone-300 dark:border-stone-700">
+              ${CURRENCY_OPTIONS.map(opt => `<option value="${opt.code}" ${cur === opt.code ? 'selected' : ''}>${opt.symbol}</option>`).join('')}
             </select>
           </div>
           <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
@@ -624,8 +622,8 @@
           <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
           <div class="flex items-center gap-1 w-3/5">
             <input type="text" value="${data.name}" oninput="onDataChange()" placeholder="ชื่อรายการ..." class="row-name bg-transparent border-b border-stone-300 dark:border-stone-800 w-full focus:outline-none">
-            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1 py-0.5 outline-none font-bold text-amber-500 border border-stone-300 dark:border-stone-700">
-              ${renderCurrencyOptions(cur)}
+            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1.5 py-0.5 outline-none font-bold text-amber-500 border border-stone-300 dark:border-stone-700">
+              ${CURRENCY_OPTIONS.map(opt => `<option value="${opt.code}" ${cur === opt.code ? 'selected' : ''}>${opt.symbol}</option>`).join('')}
             </select>
           </div>
           <input type="number" value="${data.val}" oninput="onDataChange()" class="row-val bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 ${textColor} font-bold focus:outline-none">
