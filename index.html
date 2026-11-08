@@ -109,12 +109,6 @@
               </div>
             </div>
             <div id="incomeRows" class="space-y-2"></div>
-            <div class="grid grid-cols-12 text-xs font-bold text-emerald-500 pt-2 border-t border-stone-200 dark:border-stone-700">
-              <span class="col-span-5">ผลรวมรายรับหลัก</span>
-              <span id="totIncEst" class="col-span-2 text-right">0</span>
-              <span id="totIncAct" class="col-span-3 text-right">0</span>
-              <span id="totIncDiff" class="col-span-2 text-right">0</span>
-            </div>
           </div>
 
           <!-- Expense Section -->
@@ -130,12 +124,6 @@
               </div>
             </div>
             <div id="expenseRows" class="space-y-2"></div>
-            <div class="grid grid-cols-12 text-xs font-bold text-amber-500 pt-2 border-t border-stone-200 dark:border-stone-700">
-              <span class="col-span-5">ผลรวมรายจ่ายหลัก</span>
-              <span id="totExpEst" class="col-span-2 text-right">0</span>
-              <span id="totExpAct" class="col-span-3 text-right">0</span>
-              <span id="totExpDiff" class="col-span-2 text-right">0</span>
-            </div>
           </div>
 
         </div>
@@ -150,10 +138,6 @@
               <button onclick="addExtraRow('extIncome')" class="edit-only-btn hidden bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
             </div>
             <div id="extIncomeContainer" class="space-y-2 text-xs"></div>
-            <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
-              <span class="text-emerald-500">รวมรายรับเสริม:</span>
-              <span id="subTotalExtInc" class="text-emerald-500 font-mono text-sm">0</span>
-            </div>
           </div>
 
           <!-- รายจ่ายไทย -->
@@ -163,31 +147,39 @@
               <button onclick="addExtraRow('extExpense')" class="edit-only-btn hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">+ เพิ่ม</button>
             </div>
             <div id="extExpenseContainer" class="space-y-2 text-xs"></div>
-            <div class="flex justify-between items-center pt-2 border-t border-stone-200 dark:border-stone-700 font-bold text-xs">
-              <span class="text-rose-500">รวมรายจ่ายไทย:</span>
-              <span id="subTotalExtExp" class="text-rose-500 font-mono text-sm">0</span>
-            </div>
           </div>
 
         </div>
       </div>
 
-      <!-- Summary Box -->
-      <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
-        <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
-          <div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p>
-            <p id="finalTotalIncome" class="text-lg sm:text-2xl font-extrabold text-emerald-500">0</p>
-          </div>
-          <div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p>
-            <p id="finalTotalExpense" class="text-lg sm:text-2xl font-extrabold text-rose-500">0</p>
-          </div>
-          <div>
-            <p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p>
-            <p id="finalBalance" class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">0</p>
+      <!-- Summary Box (สรุปแยกสกุลเงิน + รวมเป็นเงินไทย) -->
+      <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 shadow-xl space-y-4">
+        
+        <!-- สรุปแยกตามสกุลเงิน -->
+        <div>
+          <h4 class="text-xs font-bold text-amber-500 border-b border-stone-300 dark:border-stone-800 pb-2 mb-3">📌 สรุปยอดแยกตามสกุลเงิน</h4>
+          <div id="currencyBreakdown" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- สรุปรวมแปลงเป็นเงินบาท -->
+        <div class="pt-3 border-t-2 border-dashed border-stone-300 dark:border-stone-800">
+          <p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1 text-center">🇹🇭 ผลรวมสุทธิ (แปลงเป็นเงินบาท THB ทั้งหมด)</p>
+          <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800 text-center">
+            <div>
+              <p class="text-[10px] text-stone-400">รายรับรวม (บาท)</p>
+              <p id="totalThbIncome" class="text-base sm:text-xl font-extrabold text-emerald-500">฿0</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-stone-400">รายจ่ายรวม (บาท)</p>
+              <p id="totalThbExpense" class="text-base sm:text-xl font-extrabold text-rose-500">฿0</p>
+            </div>
+            <div>
+              <p class="text-[10px] text-amber-500 font-bold">คงเหลือสุทธิ (บาท)</p>
+              <p id="totalThbBalance" class="text-lg sm:text-2xl font-black text-amber-500">฿0</p>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -260,7 +252,20 @@
     let saveTimeout = null;
     let isEditMode = false;
 
-    // Default Data (เพิ่มฟิลด์ currency แยกแต่ละแถว: THB, LKR, USD)
+    // อัตราแลกเปลี่ยน (อิงเรทตลาด / Bitkub USDT)
+    const EXCHANGE_RATES = {
+      THB: 1.0,      // บาท
+      LKR: 0.101,    // รูปีศรีลังกา (~0.101 บาท)
+      USD: 33.50     // ดอลลาร์สหรัฐ (~33.50 บาท จาก Bitkub USDT)
+    };
+
+    const CURRENCY_OPTIONS = [
+      { code: 'THB', symbol: '฿', label: 'THB (฿1.00)' },
+      { code: 'LKR', symbol: 'Rs', label: 'LKR (Rs ≈ 0.101฿)' },
+      { code: 'USD', symbol: '$', label: 'USD ($ ≈ 33.50฿)' }
+    ];
+
+    // Default Data
     const defaultIncomes = [
       { name: "เงินเดือน (สุทธิ)", est: 11200, act: 11200, cur: "THB" },
       { name: "รายรับอื่นๆ A", est: 1100, act: 1100, cur: "THB" },
@@ -466,52 +471,68 @@
       const extExpList = data.extExpenses || defaultExtExpenses;
 
       const symbols = { THB: '฿', LKR: 'Rs', USD: '$' };
+      const curTotals = { THB: { inc: 0, exp: 0 }, LKR: { inc: 0, exp: 0 }, USD: { inc: 0, exp: 0 } };
 
-      let totIncAct = 0;
       let incHtml = incList.map(item => {
         const est = item.est || 0; const act = item.act || 0; const diff = est - act;
-        const cur = symbols[item.cur || 'THB'];
-        totIncAct += act;
+        const cur = item.cur || 'THB';
+        curTotals[cur].inc += act;
         return `
           <div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
-            <span class="col-span-5 text-emerald-500 font-semibold">${item.name || '-'} <span class="text-[10px] text-stone-400">(${cur})</span></span>
+            <span class="col-span-5 text-emerald-500 font-semibold">${item.name || '-'} <span class="text-[10px] text-stone-400">(${symbols[cur]})</span></span>
             <span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
             <span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
             <span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
           </div>`;
       }).join('');
 
-      let totExpAct = 0;
       let expHtml = expList.map(item => {
         const est = item.est || 0; const act = item.act || 0; const diff = est - act;
-        const cur = symbols[item.cur || 'THB'];
-        totExpAct += act;
+        const cur = item.cur || 'THB';
+        curTotals[cur].exp += act;
         return `
           <div class="grid grid-cols-12 gap-1 items-center text-xs py-1 border-b border-stone-200 dark:border-stone-800">
-            <span class="col-span-5 text-amber-500 font-semibold">${item.name || '-'} <span class="text-[10px] text-stone-400">(${cur})</span></span>
+            <span class="col-span-5 text-amber-500 font-semibold">${item.name || '-'} <span class="text-[10px] text-stone-400">(${symbols[cur]})</span></span>
             <span class="col-span-2 text-right">${est.toLocaleString('th-TH')}</span>
             <span class="col-span-3 text-right font-bold">${act.toLocaleString('th-TH')}</span>
             <span class="col-span-2 text-right text-stone-400 font-mono">${diff.toLocaleString('th-TH')}</span>
           </div>`;
       }).join('');
 
-      let totalExtInc = 0;
       let extIncHtml = extIncList.map(item => {
-        const val = item.val || 0; totalExtInc += val;
-        const cur = symbols[item.cur || 'THB'];
-        return `<div class="flex justify-between py-1"><span>${item.name || '-'} <span class="text-[10px] text-stone-400">(${cur})</span></span><span class="font-bold text-emerald-500">${val.toLocaleString('th-TH')}</span></div>`;
+        const val = item.val || 0; const cur = item.cur || 'THB';
+        curTotals[cur].inc += val;
+        return `<div class="flex justify-between py-1"><span>${item.name || '-'} <span class="text-[10px] text-stone-400">(${symbols[cur]})</span></span><span class="font-bold text-emerald-500">${val.toLocaleString('th-TH')}</span></div>`;
       }).join('');
 
-      let totalExtExp = 0;
       let extExpHtml = extExpList.map(item => {
-        const val = item.val || 0; totalExtExp += val;
-        const cur = symbols[item.cur || 'THB'];
-        return `<div class="flex justify-between py-1"><span>${item.name || '-'} <span class="text-[10px] text-stone-400">(${cur})</span></span><span class="font-bold text-rose-500">${val.toLocaleString('th-TH')}</span></div>`;
+        const val = item.val || 0; const cur = item.cur || 'THB';
+        curTotals[cur].exp += val;
+        return `<div class="flex justify-between py-1"><span>${item.name || '-'} <span class="text-[10px] text-stone-400">(${symbols[cur]})</span></span><span class="font-bold text-rose-500">${val.toLocaleString('th-TH')}</span></div>`;
       }).join('');
 
-      const grandTotalIncome = totIncAct + totalExtInc;
-      const grandTotalExpense = totExpAct + totalExtExp;
-      const grandTotalBalance = grandTotalIncome - grandTotalExpense;
+      let thbIncTotal = 0, thbExpTotal = 0;
+      let bdHtml = '';
+      Object.keys(curTotals).forEach(code => {
+        const inc = curTotals[code].inc;
+        const exp = curTotals[code].exp;
+        const bal = inc - exp;
+        const rate = EXCHANGE_RATES[code];
+        const sym = symbols[code];
+
+        thbIncTotal += inc * rate;
+        thbExpTotal += exp * rate;
+
+        bdHtml += `
+          <div class="bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2.5 rounded-xl text-xs space-y-1">
+            <p class="font-bold text-amber-500 flex justify-between"><span>${code} (${sym})</span><span class="text-[10px] text-stone-400">เรท ${rate}฿</span></p>
+            <div class="flex justify-between"><span class="text-stone-400">รับ:</span><span class="text-emerald-500 font-bold">${sym}${inc.toLocaleString('th-TH')}</span></div>
+            <div class="flex justify-between"><span class="text-stone-400">จ่าย:</span><span class="text-rose-500 font-bold">${sym}${exp.toLocaleString('th-TH')}</span></div>
+            <div class="flex justify-between pt-1 border-t border-stone-200 dark:border-stone-800 font-bold"><span class="text-stone-300">เหลือ:</span><span class="text-amber-400">${sym}${bal.toLocaleString('th-TH')}</span></div>
+          </div>`;
+      });
+
+      const thbBalTotal = thbIncTotal - thbExpTotal;
 
       const html = `
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -550,11 +571,18 @@
           </div>
         </div>
 
-        <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 text-center shadow-xl">
-          <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
-            <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายรับทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-emerald-500">${grandTotalIncome.toLocaleString('th-TH')}</p></div>
-            <div><p class="text-xs text-stone-500 dark:text-stone-400 font-semibold mb-1">ผลรวมรายจ่ายทั้งหมด</p><p class="text-lg sm:text-2xl font-extrabold text-rose-500">${grandTotalExpense.toLocaleString('th-TH')}</p></div>
-            <div><p class="text-xs text-amber-500 font-semibold mb-1">คงเหลือสุทธิ</p><p class="text-xl sm:text-4xl font-black text-amber-500 tracking-tight">${grandTotalBalance.toLocaleString('th-TH')}</p></div>
+        <div class="bg-stone-100 dark:bg-stone-950 border border-amber-500/40 rounded-2xl p-4 space-y-4 shadow-xl">
+          <div>
+            <h4 class="text-xs font-bold text-amber-500 border-b border-stone-300 dark:border-stone-800 pb-2 mb-3">📌 สรุปยอดแยกตามสกุลเงิน</h4>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">${bdHtml}</div>
+          </div>
+          <div class="pt-3 border-t-2 border-dashed border-stone-300 dark:border-stone-800 text-center">
+            <p class="text-xs text-stone-400 mb-1">🇹🇭 ผลรวมสุทธิ (แปลงเป็นเงินบาท THB ทั้งหมด)</p>
+            <div class="grid grid-cols-3 divide-x divide-stone-300 dark:divide-stone-800">
+              <div><p class="text-[10px] text-stone-400">รายรับรวม</p><p class="text-base sm:text-xl font-extrabold text-emerald-500">฿${thbIncTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p></div>
+              <div><p class="text-[10px] text-stone-400">รายจ่ายรวม</p><p class="text-base sm:text-xl font-extrabold text-rose-500">฿${thbExpTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p></div>
+              <div><p class="text-[10px] text-amber-500 font-bold">คงเหลือสุทธิ</p><p class="text-lg sm:text-2xl font-black text-amber-500">฿${thbBalTotal.toLocaleString('th-TH', {minimumFractionDigits: 2})}</p></div>
+            </div>
           </div>
         </div>
       `;
@@ -563,6 +591,12 @@
     }
 
     // --- SPREADSHEET RENDER & EDITING LOGIC ---
+    function renderCurrencyOptions(selectedCur) {
+      return CURRENCY_OPTIONS.map(opt => `
+        <option value="${opt.code}" ${selectedCur === opt.code ? 'selected' : ''}>${opt.label}</option>
+      `).join('');
+    }
+
     function createRowHTML(type, data = { name: '', est: 0, act: 0, cur: 'THB' }) {
       const textColor = type === 'income' ? 'text-emerald-500' : 'text-amber-500';
       const cur = data.cur || 'THB';
@@ -571,10 +605,8 @@
           <div class="col-span-5 flex items-center gap-1">
             <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
             <input type="text" value="${data.name}" placeholder="ชื่อรายการ..." oninput="onDataChange()" class="row-name w-full bg-transparent border-b border-stone-300 dark:border-stone-800 ${textColor} focus:border-amber-500 focus:outline-none px-1">
-            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1 py-0.5 outline-none font-bold text-amber-500">
-              <option value="THB" ${cur === 'THB' ? 'selected' : ''}>฿</option>
-              <option value="LKR" ${cur === 'LKR' ? 'selected' : ''}>Rs</option>
-              <option value="USD" ${cur === 'USD' ? 'selected' : ''}>$</option>
+            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1 py-0.5 outline-none font-bold text-amber-500 border border-stone-300 dark:border-stone-700">
+              ${renderCurrencyOptions(cur)}
             </select>
           </div>
           <input type="number" step="0.01" value="${data.est}" oninput="onDataChange()" class="row-est col-span-2 bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-800 rounded text-right px-1 py-1 text-stone-700 dark:text-stone-200 focus:outline-none">
@@ -592,10 +624,8 @@
           <button onclick="removeRow(this)" class="edit-only-btn ${isEditMode ? '' : 'hidden'} text-rose-500 hover:text-rose-700 font-bold px-1">🗑️</button>
           <div class="flex items-center gap-1 w-3/5">
             <input type="text" value="${data.name}" oninput="onDataChange()" placeholder="ชื่อรายการ..." class="row-name bg-transparent border-b border-stone-300 dark:border-stone-800 w-full focus:outline-none">
-            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1 py-0.5 outline-none font-bold text-amber-500">
-              <option value="THB" ${cur === 'THB' ? 'selected' : ''}>฿</option>
-              <option value="LKR" ${cur === 'LKR' ? 'selected' : ''}>Rs</option>
-              <option value="USD" ${cur === 'USD' ? 'selected' : ''}>$</option>
+            <select onchange="onDataChange()" class="row-cur bg-stone-200 dark:bg-stone-800 text-[10px] rounded px-1 py-0.5 outline-none font-bold text-amber-500 border border-stone-300 dark:border-stone-700">
+              ${renderCurrencyOptions(cur)}
             </select>
           </div>
           <input type="number" value="${data.val}" oninput="onDataChange()" class="row-val bg-white dark:bg-stone-900 border border-stone-300 dark:border-stone-700 rounded px-2 py-1 text-right w-2/5 ${textColor} font-bold focus:outline-none">
@@ -723,52 +753,84 @@
 
     // --- CALCULATIONS LOGIC ---
     function calculate() {
-      let totIncEst = 0, totIncAct = 0, totIncDiff = 0;
+      const curTotals = {
+        THB: { inc: 0, exp: 0 },
+        LKR: { inc: 0, exp: 0 },
+        USD: { inc: 0, exp: 0 }
+      };
+
+      const symbols = { THB: '฿', LKR: 'Rs', USD: '$' };
+
+      // รายรับหลัก
       document.querySelectorAll('.income-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
         const act = parseFloat(row.querySelector('.row-act').value) || 0;
+        const cur = row.querySelector('.row-cur').value || 'THB';
         const diff = est - act;
         row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
-        totIncEst += est; totIncAct += act; totIncDiff += diff;
+        curTotals[cur].inc += act;
       });
 
-      document.getElementById('totIncEst').textContent = totIncEst.toLocaleString('th-TH');
-      document.getElementById('totIncAct').textContent = totIncAct.toLocaleString('th-TH');
-      document.getElementById('totIncDiff').textContent = totIncDiff.toLocaleString('th-TH');
-
-      let totExpEst = 0, totExpAct = 0, totExpDiff = 0;
+      // รายจ่ายหลัก
       document.querySelectorAll('.expense-row').forEach(row => {
         const est = parseFloat(row.querySelector('.row-est').value) || 0;
         const act = parseFloat(row.querySelector('.row-act').value) || 0;
+        const cur = row.querySelector('.row-cur').value || 'THB';
         const diff = est - act;
         row.querySelector('.row-diff').textContent = diff.toLocaleString('th-TH');
-        totExpEst += est; totExpAct += act; totExpDiff += diff;
+        curTotals[cur].exp += act;
       });
 
-      document.getElementById('totExpEst').textContent = totExpEst.toLocaleString('th-TH');
-      document.getElementById('totExpAct').textContent = totExpAct.toLocaleString('th-TH');
-      document.getElementById('totExpDiff').textContent = totExpDiff.toLocaleString('th-TH');
-
-      let totalExtInc = 0;
+      // รายรับเสริม
       document.querySelectorAll('.extIncome-row').forEach(row => {
-        totalExtInc += parseFloat(row.querySelector('.row-val').value) || 0;
+        const val = parseFloat(row.querySelector('.row-val').value) || 0;
+        const cur = row.querySelector('.row-cur').value || 'THB';
+        curTotals[cur].inc += val;
       });
 
-      let totalExtExp = 0;
+      // รายจ่ายไทย
       document.querySelectorAll('.extExpense-row').forEach(row => {
-        totalExtExp += parseFloat(row.querySelector('.row-val').value) || 0;
+        const val = parseFloat(row.querySelector('.row-val').value) || 0;
+        const cur = row.querySelector('.row-cur').value || 'THB';
+        curTotals[cur].exp += val;
       });
 
-      document.getElementById('subTotalExtInc').textContent = totalExtInc.toLocaleString('th-TH');
-      document.getElementById('subTotalExtExp').textContent = totalExtExp.toLocaleString('th-TH');
+      // แสดงการสรุปแยกตามสกุลเงิน + แปลงเป็น THB
+      const breakdownEl = document.getElementById('currencyBreakdown');
+      breakdownEl.innerHTML = '';
 
-      const grandTotalIncome = totIncAct + totalExtInc;
-      const grandTotalExpense = totExpAct + totalExtExp;
-      const grandTotalBalance = grandTotalIncome - grandTotalExpense;
+      let thbIncTotal = 0;
+      let thbExpTotal = 0;
 
-      document.getElementById('finalTotalIncome').textContent = grandTotalIncome.toLocaleString('th-TH');
-      document.getElementById('finalTotalExpense').textContent = grandTotalExpense.toLocaleString('th-TH');
-      document.getElementById('finalBalance').textContent = grandTotalBalance.toLocaleString('th-TH');
+      Object.keys(curTotals).forEach(code => {
+        const inc = curTotals[code].inc;
+        const exp = curTotals[code].exp;
+        const bal = inc - exp;
+        const rate = EXCHANGE_RATES[code];
+        const sym = symbols[code];
+
+        thbIncTotal += inc * rate;
+        thbExpTotal += exp * rate;
+
+        const card = document.createElement('div');
+        card.className = "bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2.5 rounded-xl text-xs space-y-1";
+        card.innerHTML = `
+          <div class="font-bold text-amber-500 flex justify-between items-center">
+            <span>${code} (${sym})</span>
+            <span class="text-[10px] text-stone-400 font-normal">เรท ${rate}฿</span>
+          </div>
+          <div class="flex justify-between"><span class="text-stone-400">รายรับ:</span><span class="text-emerald-500 font-bold">${sym}${inc.toLocaleString('th-TH')}</span></div>
+          <div class="flex justify-between"><span class="text-stone-400">รายจ่าย:</span><span class="text-rose-500 font-bold">${sym}${exp.toLocaleString('th-TH')}</span></div>
+          <div class="flex justify-between pt-1 border-t border-stone-200 dark:border-stone-800 font-bold"><span class="text-stone-400">คงเหลือ:</span><span class="${bal >= 0 ? 'text-amber-400' : 'text-rose-400'}">${sym}${bal.toLocaleString('th-TH')}</span></div>
+        `;
+        breakdownEl.appendChild(card);
+      });
+
+      const thbBalTotal = thbIncTotal - thbExpTotal;
+
+      document.getElementById('totalThbIncome').textContent = `฿${thbIncTotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('totalThbExpense').textContent = `฿${thbExpTotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('totalThbBalance').textContent = `฿${thbBalTotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     }
   </script>
 </body>
