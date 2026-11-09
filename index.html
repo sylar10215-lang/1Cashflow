@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>MJ Cashflow & Social Budget System</title>
   
+  <!-- ตั้งค่า Web App PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#f59e0b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/5501/5501375.png">
+
   <!-- บังคับไม่ให้เบราว์เซอร์จำแคชหน้าเว็บหลัก (Force No-Cache) -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
@@ -33,6 +40,10 @@
       <h1 class="text-lg font-bold text-amber-500">MJ Cashflow Community</h1>
     </div>
     <div class="flex items-center gap-2">
+      <!-- ปุ่มกดติดตั้งแอป (จะแสดงเฉพาะบนมือถือที่รองรับ) -->
+      <button id="installAppBtn" onclick="installPWA()" class="hidden p-2 rounded-xl bg-amber-500 text-stone-900 font-bold text-xs items-center gap-1 shadow animate-bounce">
+        📲 ติดตั้งแอป
+      </button>
       <button onclick="toggleTheme()" class="p-2 rounded-xl bg-stone-200 dark:bg-stone-800 text-stone-800 dark:text-amber-400 font-bold text-xs flex items-center gap-1 shadow">
         <span id="themeIcon">☀️</span> <span id="themeText">โหมดสว่าง</span>
       </button>
@@ -267,6 +278,31 @@
   </div>
 
   <script>
+    // Register Service Worker
+    let deferredPrompt;
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW Reg Failed:', err));
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      const btn = document.getElementById('installAppBtn');
+      if (btn) btn.classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            document.getElementById('installAppBtn').classList.add('hidden');
+          }
+          deferredPrompt = null;
+        });
+      }
+    }
+
     // --- FIREBASE CONFIG ---
     const firebaseConfig = {
       apiKey: "AIzaSyDmAc0U5-f-NLeYQpCvFPa8SgGr7_Cm9Bk",
@@ -285,7 +321,7 @@
     let currentUser = null;
     let saveTimeout = null;
     let isEditMode = false;
-    let rowPendingDelete = null; // เก็บแถวที่จะลบ
+    let rowPendingDelete = null;
 
     // อัตราแลกเปลี่ยน (อิงเรทตลาด / Bitkub USDT)
     const EXCHANGE_RATES = {
@@ -938,7 +974,7 @@
       // รายรับหลัก
       document.querySelectorAll('.income-row').forEach(row => {
         const typeInput = row.querySelector('.row-type');
-        if (typeInput && typeInput.value === 'note') return; // ข้ามหมายเหตุ
+        if (typeInput && typeInput.value === 'note') return;
 
         const act = parseFloat(row.querySelector('.row-act').value) || 0;
         const cur = row.querySelector('.row-cur').value || 'THB';
@@ -948,7 +984,7 @@
       // รายจ่ายหลัก
       document.querySelectorAll('.expense-row').forEach(row => {
         const typeInput = row.querySelector('.row-type');
-        if (typeInput && typeInput.value === 'note') return; // ข้ามหมายเหตุ
+        if (typeInput && typeInput.value === 'note') return;
 
         const act = parseFloat(row.querySelector('.row-act').value) || 0;
         const cur = row.querySelector('.row-cur').value || 'THB';
